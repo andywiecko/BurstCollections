@@ -1,0 +1,25 @@
+{
+    "name": "com.andywiecko.burst.collections",
+    "version": "1.0.0",
+    "displayName": "Burst Collections",
+    "description": "Burst friendly (special) native collections for Unity.",
+    "unity": "2021.1",
+    "unityRelease": "16f1",
+    "keywords": [
+        "Burst",
+        "Collections"
+    ],
+    "author": {
+        "name": "Andrzej Więckowski",
+        "email": "andywiecko@gmail.com",
+        "url": "https://andywiecko.github.io/"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/andywiecko/BurstCollections"
+    },
+    "dependencies": {
+        "com.unity.burst": "1.5.5",
+        "com.unity.jobs": "0.11.0-preview.6"
+    }
+}
