@@ -5,6 +5,9 @@ Burst friendly (special) native collections for Unity.
 - [BurstCollections](#burstcollections)
   - [Getting started](#getting-started)
   - [NativeStack{T}](#nativestackt)
+  - [NativeAccumulatedProduct{T, Op}](#nativeaccumulatedproductt-op)
+  - [NativeIndexedArray{Id, T}](#nativeindexedarrayid-t)
+  - [NativeIndexedList{Id, T}](#nativeindexedlistid-t)
   - [BoundingVolumeTree{T}](#boundingvolumetreet)
     - [Example usage](#example-usage)
     - [Results](#results)
@@ -42,6 +45,82 @@ stack.Dispose();
 ```
 
 Remarks: implementation probably will be deprecated in the future, when Unity team add stack implementation to `Unity.Collections`.
+
+## NativeAccumulatedProduct{T, Op}
+
+A wrapper which is especially useful for parallel calculation of the abelian operators, e.g. sum, min, max.
+Generic parameter `Op` must implement the `IAbelianOperator<T>` interface
+
+```csharp
+public interface IAbelianOperator<TSelf> where TSelf : unmanaged
+{
+  TSelf Product(TSelf a, TSelf b);
+  TSelf NeturalElement { get; }
+}
+```
+
+Consider the following example
+
+```csharp
+var values = Enumerable.Range(0, 1024 * 1024).ToArray();
+using var data = new NativeArray<int>(values, Allocator.Persistent);
+using var product = new NativeAccumulatedProduct<int, IntSum>(Allocator.Persistent);
+
+JobHandle dependencies = default;
+
+dependencies = product.AccumulateProducts(data.AsReadOnly(), innerloopBatchCount: 64, dependencies).
+dependencies = product.Combine(dependencies);
+
+dependencies.Complete();
+
+Debug.Log(product.Value); // Expected: 0 + 1 + 2 + ... + (1024 * 1024 - 1).
+```
+
+In the example presented above, we first, allocate the array with numbers: 0, 1, 2, 3, ..., then
+we allocate buffers for accumulated products and we chose the `IntSum` operation.
+Then after jobs completion, we obtain the sum of all elements, which
+was done in **parallel**.
+
+Supported operations:
+
+- `int/int2/int3/int4`: `Int(2/3/4)Sum`, `Int(2/3/4)Min`, `Int(2/3/4)Max`,
+- `float/float2/float3/float4`: `Float(2/3/4)Sum`, `Float(2/3/4)Min`, `Float(2/3/4)Max`,
+- `AABB`: `AABBUnion`.
+
+## NativeIndexedArray{Id, T}
+
+Wrapper for `NativeArray<T>` which supports indexing via `Id<T>` instead of `int`, where `T` is a non-constraint generic parameter.
+The collection is useful for enumeration of the specifically listed objects like triangles, circles, points, etc., and their properties.
+Using `Id` could protect from errors related to reading from nonrelated buffer with the given type of objects.
+Consider the following struct
+
+```csharp
+public readonly struct Triangle { /* ... */ }
+```
+
+Then using the `NativeIndexedArray` one can prepare the following collections
+to group some triangle properties.
+
+```csharp
+using var triangles = new NativeIndexedArray<Id<Triangle>, Triangle>(128, Allocator.Persistent);
+using var areas = new NativeIndexedArray<Id<Triangle>, float>(128, Allocator.Persistent);
+using var neighborsCount = new NativeIndexedArray<Id<Triangle>, int>(128, Allocator.Persistent);
+```
+
+To access the elements one has to use `Id<Triangle>` instead of `int`
+
+```csharp
+var triangleId = (Id<Triangle>)42;
+
+var triangle = triangles[triangleId];
+var area = areas[triangleId];
+var neighborCount = neighborsCount[triangleId];
+```
+
+## NativeIndexedList{Id, T}
+
+Wrapper for `NativeList<T>` which supports indexing via `Id<T>` instead of `int`, where `T` is a non-constraint generic parameter.
+See [NativeIndexedArray{Id, T}](#nativeindexedarrayid-t) for more details.
 
 ## BoundingVolumeTree{T}
 
