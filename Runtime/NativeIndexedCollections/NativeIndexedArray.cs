@@ -1,0 +1,60 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using Unity.Collections;
+using Unity.Jobs;
+
+namespace andywiecko.BurstCollections
+{
+    /// <summary>
+    /// Wrapper for <see cref="NativeArray{T}"/> which supports indexing via <see cref="Id{T}"/> instead of <see langword="int"/>.
+    /// </summary>
+    public struct NativeIndexedArray<Id, T> : INativeDisposable, IEnumerable<T>, IEnumerable, IEquatable<NativeIndexedArray<Id, T>>
+        where Id : unmanaged, IIndexer
+        where T : unmanaged
+    {
+        public T this[Id index] { get => array[index.Value]; set => array[index.Value] = value; }
+        public bool IsCreated => array.IsCreated;
+        public int Length => array.Length;
+
+        internal NativeArray<T> array;
+
+        public NativeIndexedArray(T[] array, Allocator allocator) : this(array.Length, allocator)
+        {
+            this.array.CopyFrom(array);
+        }
+
+        public NativeIndexedArray(int length, Allocator allocator, NativeArrayOptions options = NativeArrayOptions.ClearMemory)
+        {
+            array = new NativeArray<T>(length, allocator, options);
+        }
+
+        public void Dispose() => array.Dispose();
+        public JobHandle Dispose(JobHandle dependencies) => array.Dispose(dependencies);
+
+        public NativeArray<T>.Enumerator GetEnumerator() => array.GetEnumerator();
+        IEnumerator<T> IEnumerable<T>.GetEnumerator() => GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        public bool Equals(NativeIndexedArray<Id, T> other) => array.Equals(other.GetInnerArray());
+
+        public NativeArray<T> GetInnerArray() => array;
+        public ReadOnly AsReadOnly() => new ReadOnly(this);
+
+        #region ReadOnly
+        public struct ReadOnly
+        {
+            public T this[Id index] => array[index.Value];
+            public int Length => array.Length;
+
+            internal NativeArray<T>.ReadOnly array;
+            internal ReadOnly(NativeIndexedArray<Id, T> owner) => array = owner.GetInnerArray().AsReadOnly();
+
+            public void CopyTo(T[] array) => this.array.CopyTo(array);
+            public void CopyTo(NativeArray<T> array) => this.array.CopyTo(array);
+            public NativeIndexedArray<Id, U>.ReadOnly Reinterpret<U>() where U : unmanaged => new NativeIndexedArray<Id, U>.ReadOnly() { array = array.Reinterpret<U>() };
+            public T[] ToArray() => array.ToArray();
+        }
+        #endregion
+    }
+}

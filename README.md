@@ -6,6 +6,8 @@ Burst friendly (special) native collections for Unity.
   - [Getting started](#getting-started)
   - [NativeStack{T}](#nativestackt)
   - [NativeAccumulatedProduct{T, Op}](#nativeaccumulatedproductt-op)
+  - [NativeIndexedArray{Id, T}](#nativeindexedarrayid-t)
+  - [NativeIndexedList{Id, T}](#nativeindexedlistid-t)
   - [BoundingVolumeTree{T}](#boundingvolumetreet)
     - [Example usage](#example-usage)
     - [Results](#results)
@@ -47,7 +49,7 @@ Remarks: implementation probably will be deprecated in the future, when Unity te
 ## NativeAccumulatedProduct{T, Op}
 
 A wrapper which is especially useful for parallel calculation of the abelian operators, e.g. sum, min, max.
-Generic parameter `Op` must implement the `IAbelianOperator{T}` interface
+Generic parameter `Op` must implement the `IAbelianOperator<T>` interface
 
 ```csharp
 public interface IAbelianOperator<TSelf> where TSelf : unmanaged
@@ -84,6 +86,40 @@ Supported operations:
 - `int/int2/int3/int4`: `Int(2/3/4)Sum`, `Int(2/3/4)Min`, `Int(2/3/4)Max`,
 - `float/float2/float3/float4`: `Float(2/3/4)Sum`, `Float(2/3/4)Min`, `Float(2/3/4)Max`,
 - `AABB`: `AABBUnion`.
+
+## NativeIndexedArray{Id, T}
+
+Wrapper for `NativeArray<T>` which supports indexing via `Id<T>` instead of `int`, where `T` is non-constraint generic parameter.
+The collection is useful for enumeration the specific listed objects like triangles, circles, points, etc. and their properties.
+Using `Id` could protect from errors related to reading from nonrelated buffer with the given type of objects.
+Consider the following struct
+
+```csharp
+public readonly struct Triangle { /* ... */ }
+```
+
+Then using the `NativeIndexedArray` one can prepare the following collections
+to group some triangle properties.
+
+```csharp
+using triangles = new NativeIndexedArray<Id<Triangle>, Triangle>(128, Allocator.Persistent);
+using areas = new NativeIndexedArray<Id<Triangle>, float>(128, Allocator.Persistent);
+using neighborsCount = new NativeIndexedArray<Id<Triangle>, int>(128, Allocator.Persistent);
+```
+
+To access the elements one has to use `Id<Triangle>` instead of `int`
+
+```csharp
+var triangleId = (Id<Triangle>)42;
+var triangle = triangles[triangleId];
+var area = areas[triangleId];
+var neighborCount = neighborsCount[triangleId];
+```
+
+## NativeIndexedList{Id, T}
+
+Wrapper for `NativeList<T>` which supports indexing via `Id<T>` instead of `int`, where `T` is non-constraint generic parameter.
+See [NativeIndexedArray{Id, T}](#nativeindexedarrayid-t) for more details.
 
 ## BoundingVolumeTree{T}
 
