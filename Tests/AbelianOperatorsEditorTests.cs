@@ -12,7 +12,7 @@ namespace andywiecko.BurstCollections.Editor.Tests
             new TestCaseData(math.int2(12, 12), new Int2Sum()) {TestName = "Int2Sum", ExpectedResult = math.int2(12, 12)},
             new TestCaseData(math.int3(12, 12, 12), new Int3Sum()) {TestName = "Int3Sum", ExpectedResult = math.int3(12, 12, 12)},
             new TestCaseData(math.int4(12, 12, 12, 12), new Int4Sum()) {TestName = "Int4Sum", ExpectedResult = math.int4(12, 12, 12, 12)},
-            
+
             new TestCaseData(12, new IntMin()) {TestName = "IntMin", ExpectedResult = 12},
             new TestCaseData(math.int2(12, 12), new Int2Min()) {TestName = "Int2Min", ExpectedResult = math.int2(12, 12)},
             new TestCaseData(math.int3(12, 12, 12), new Int3Min()) {TestName = "Int3Min", ExpectedResult = math.int3(12, 12, 12)},

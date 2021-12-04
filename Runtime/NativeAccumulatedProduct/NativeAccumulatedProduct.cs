@@ -6,10 +6,19 @@ using Unity.Jobs.LowLevel.Unsafe;
 
 namespace andywiecko.BurstCollections
 {
+    /// <summary>
+    /// Wrapper which allows for parallel abelian operations calculations between threads, 
+    /// i.e. calculating the sum, min, max, etc. for the given array in parallel.
+    /// </summary>
+    /// <typeparam name="T">Type of operator elements.</typeparam>
+    /// <typeparam name="Op">Type of abelian operator.</typeparam>
     public struct NativeAccumulatedProduct<T, Op> : INativeDisposable
         where T : unmanaged
         where Op : unmanaged, IAbelianOperator<T>
     {
+        /// <summary>
+        /// The accumulated result of the products.
+        /// </summary>
         public T Value => result.Value;
 
         [NativeSetThreadIndex] private int threadIndex;
@@ -28,23 +37,31 @@ namespace andywiecko.BurstCollections
             op = default;
 
             maxThreadCount = JobsUtility.JobWorkerMaximumCount + 2;
-            //maxThreadCount = JobsUtility.MaxJobThreadCount;
 
             result = new NativeReference<T>(op.NeturalElement, allocator);
             tmp = new NativeArray<T>(maxThreadCount, allocator);
             Reset();
         }
 
+        /// <summary>
+        /// Accumulate the result of the products for all elements in the <paramref name="data"/>.
+        /// </summary>
         public JobHandle AccumulateProducts(NativeArray<T>.ReadOnly data, int innerloopBatchCount, JobHandle dependencies)
         {
             return new AccumulateProductsJob(this, data).Schedule(data.Length, innerloopBatchCount, dependencies);
         }
 
+        /// <summary>
+        /// Accumulate <paramref name="element"/> product with the accumulated result.
+        /// </summary>
         public void AccumulateProduct(T element)
         {
             tmp[threadIndex] = op.Product(tmp[threadIndex], element);
         }
 
+        /// <summary>
+        /// Reset threads temporary data to neutral elements.
+        /// </summary>
         public void Reset()
         {
             for (int i = 0; i < tmp.Length; i++)
@@ -53,9 +70,15 @@ namespace andywiecko.BurstCollections
             }
         }
 
+        /// <summary>
+        /// Reset threads temporary data to neutral elements (jobified).
+        /// </summary>
         public JobHandle Reset(JobHandle dependencies) => new ResetJob(this).Schedule(dependencies);
 
-        public JobHandle Combine(JobHandle dependencies) => new CombineJob(this).Schedule(dependencies);
+        /// <summary>
+        /// Combine all threads temporary data to the final result.
+        /// </summary>
+        public JobHandle Combine(JobHandle dependencies = default) => new CombineJob(this).Schedule(dependencies);
 
         public JobHandle Dispose(JobHandle dependencies)
         {
@@ -75,22 +98,22 @@ namespace andywiecko.BurstCollections
         [BurstCompile]
         private struct CombineJob : IJob
         {
-            private NativeAccumulatedProduct<T, Op> output;
+            private NativeAccumulatedProduct<T, Op> product;
 
-            public CombineJob(NativeAccumulatedProduct<T, Op> output)
+            public CombineJob(NativeAccumulatedProduct<T, Op> product)
             {
-                this.output = output;
+                this.product = product;
             }
 
             public void Execute()
             {
-                var op = output.op;
+                var op = product.op;
                 var result = op.NeturalElement;
-                for (int i = 0; i < output.tmp.Length; i++)
+                for (int i = 0; i < product.tmp.Length; i++)
                 {
-                    result = op.Product(result, output.tmp[i]);
+                    result = op.Product(result, product.tmp[i]);
                 }
-                output.result.Value = result;
+                product.result.Value = result;
             }
         }
 
@@ -104,10 +127,7 @@ namespace andywiecko.BurstCollections
                 this.product = product;
             }
 
-            public void Execute()
-            {
-                product.Reset();
-            }
+            public void Execute() => product.Reset();
         }
 
         [BurstCompile]
@@ -122,10 +142,7 @@ namespace andywiecko.BurstCollections
                 this.data = data;
             }
 
-            public void Execute(int index)
-            {
-                product.AccumulateProduct(data[index]);
-            }
+            public void Execute(int index) => product.AccumulateProduct(data[index]);
         }
 
         #endregion

@@ -86,5 +86,24 @@ namespace andywiecko.BurstCollections.Editor.Tests
 
             return tmp.Value;
         }
+
+        [Test]
+        public void ResetTest()
+        {
+            var size = 1024 * 1024;
+            var vals = Enumerable.Repeat(1, size).ToArray();
+            using var array = new NativeArray<int>(vals, Allocator.Persistent);
+            using var tmp = new NativeAccumulatedProduct<int, IntSum>(Allocator.Persistent);
+
+            JobHandle dependencies = default;
+            dependencies = tmp.AccumulateProducts(array.AsReadOnly(), innerloopBatchCount: 64, dependencies);
+            dependencies = tmp.Combine(dependencies);
+            dependencies = tmp.Reset(dependencies);
+            dependencies = tmp.Combine(dependencies);
+            
+            dependencies.Complete();
+
+            Assert.That(tmp.Value, Is.EqualTo(new IntSum().NeturalElement));
+        }
     }
 }
