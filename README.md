@@ -63,8 +63,8 @@ Consider the following example
 
 ```csharp
 var values = Enumerable.Range(0, 1024 * 1024).ToArray();
-using data = new NativeArray<int>(values, Allocator.Persistent);
-using product = new NativeAccumulatedProduct<int, IntSum>(Allocator.Persistent);
+using var data = new NativeArray<int>(values, Allocator.Persistent);
+using var product = new NativeAccumulatedProduct<int, IntSum>(Allocator.Persistent);
 
 JobHandle dependencies = default;
 
@@ -89,8 +89,8 @@ Supported operations:
 
 ## NativeIndexedArray{Id, T}
 
-Wrapper for `NativeArray<T>` which supports indexing via `Id<T>` instead of `int`, where `T` is non-constraint generic parameter.
-The collection is useful for enumeration the specific listed objects like triangles, circles, points, etc. and their properties.
+Wrapper for `NativeArray<T>` which supports indexing via `Id<T>` instead of `int`, where `T` is a non-constraint generic parameter.
+The collection is useful for enumeration of the specifically listed objects like triangles, circles, points, etc., and their properties.
 Using `Id` could protect from errors related to reading from nonrelated buffer with the given type of objects.
 Consider the following struct
 
@@ -102,15 +102,16 @@ Then using the `NativeIndexedArray` one can prepare the following collections
 to group some triangle properties.
 
 ```csharp
-using triangles = new NativeIndexedArray<Id<Triangle>, Triangle>(128, Allocator.Persistent);
-using areas = new NativeIndexedArray<Id<Triangle>, float>(128, Allocator.Persistent);
-using neighborsCount = new NativeIndexedArray<Id<Triangle>, int>(128, Allocator.Persistent);
+using var triangles = new NativeIndexedArray<Id<Triangle>, Triangle>(128, Allocator.Persistent);
+using var areas = new NativeIndexedArray<Id<Triangle>, float>(128, Allocator.Persistent);
+using var neighborsCount = new NativeIndexedArray<Id<Triangle>, int>(128, Allocator.Persistent);
 ```
 
 To access the elements one has to use `Id<Triangle>` instead of `int`
 
 ```csharp
 var triangleId = (Id<Triangle>)42;
+
 var triangle = triangles[triangleId];
 var area = areas[triangleId];
 var neighborCount = neighborsCount[triangleId];
@@ -118,7 +119,7 @@ var neighborCount = neighborsCount[triangleId];
 
 ## NativeIndexedList{Id, T}
 
-Wrapper for `NativeList<T>` which supports indexing via `Id<T>` instead of `int`, where `T` is non-constraint generic parameter.
+Wrapper for `NativeList<T>` which supports indexing via `Id<T>` instead of `int`, where `T` is a non-constraint generic parameter.
 See [NativeIndexedArray{Id, T}](#nativeindexedarrayid-t) for more details.
 
 ## BoundingVolumeTree{T}
