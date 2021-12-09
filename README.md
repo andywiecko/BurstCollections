@@ -117,6 +117,27 @@ var area = areas[triangleId];
 var neighborCount = neighborsCount[triangleId];
 ```
 
+`NativeIndexedArray<Id, T>` can be enumarated by using values, ids or id–value tuples:
+
+```csharp
+using var data = new NativeIndexedArray<Id<int>, int>(new[]{1, 42, 6}, Allocator.Persistent);
+
+foreach(var value in data)
+{
+  UnityEngine.Debug.Log(value); 
+} // Expected: 1, 42, 6.
+
+foreach(var id in data.Ids)
+{
+  UnityEngine.Debug.Log(id); 
+} // Expected: (Id<int>)0, (Id<int>)1, (Id<int>)2.
+
+foreach(var (id, value) in data.IdsValues)
+{
+  UnityEngine.Debug.Log(id); 
+} // Expected: ((Id<int>)0, 1), ((Id<int>)1, 42), ((Id<int>)2, 6).
+```
+
 ## NativeIndexedList{Id, T}
 
 Wrapper for `NativeList<T>` which supports indexing via `Id<T>` instead of `int`, where `T` is a non-constraint generic parameter.

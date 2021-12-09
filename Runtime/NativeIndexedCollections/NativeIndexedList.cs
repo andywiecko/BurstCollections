@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Collections;
@@ -39,10 +40,10 @@ namespace andywiecko.BurstCollections
         public void RemoveRangeSwapBack(int index, int count) => list.RemoveRangeSwapBack(index, count);
         public void RemoveAt(int index) => list.RemoveAt(index);
         public void RemoveRange(int index, int count) => list.RemoveRange(index, count);
-        public NativeIndexedArray<Id, T> AsArray() => new NativeIndexedArray<Id, T>() { array = list.AsArray() };
-        public NativeIndexedArray<Id, T> AsDeferredJobArray() => new NativeIndexedArray<Id, T>() { array = list.AsDeferredJobArray() };
+        public NativeIndexedArray<Id, T> AsArray() => new() { array = list.AsArray() };
+        public NativeIndexedArray<Id, T> AsDeferredJobArray() => new() { array = list.AsDeferredJobArray() };
         public T[] ToArray() => list.ToArray();
-        public NativeIndexedArray<Id, T> ToArray(AllocatorManager.AllocatorHandle allocator) => new NativeIndexedArray<Id, T>() { array = list.ToArray(allocator) };
+        public NativeIndexedArray<Id, T> ToArray(AllocatorManager.AllocatorHandle allocator) => new() { array = list.ToArray(allocator) };
         public NativeArray<T>.Enumerator GetEnumerator() => list.GetEnumerator();
         IEnumerator<T> IEnumerable<T>.GetEnumerator() => (list as IEnumerable<T>).GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => (list as IEnumerable).GetEnumerator();
@@ -50,8 +51,11 @@ namespace andywiecko.BurstCollections
         public void CopyFrom(NativeArray<T> array) => list.CopyFrom(array);
         public void Resize(int length, NativeArrayOptions options) => list.Resize(length, options);
         public void ResizeUninitialized(int length) => list.ResizeUninitialized(length);
-        public NativeIndexedArray<Id, T>.ReadOnly AsParallelReader() => new NativeIndexedArray<Id, T>.ReadOnly() { array = list.AsParallelReader() };
-        public ParallelWriter AsParallelWriter() => new ParallelWriter(this);
+        public NativeIndexedArray<Id, T>.ReadOnly AsParallelReader() => new() { array = list.AsParallelReader() };
+        public ParallelWriter AsParallelWriter() => new(this);
+        unsafe public ReadOnlySpan<T> AsReadOnlySpan() => new(list.GetUnsafeReadOnlyPtr(), Length);
+        public IdEnumerator<Id> Ids => new(start: 0, Length);
+        public IdValueEnumerator<Id, T> IdsValues => new(AsReadOnlySpan());
 
         public struct ParallelWriter
         {

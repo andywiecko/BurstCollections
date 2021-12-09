@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 
 namespace andywiecko.BurstCollections
@@ -39,7 +40,10 @@ namespace andywiecko.BurstCollections
         public bool Equals(NativeIndexedArray<Id, T> other) => array.Equals(other.GetInnerArray());
 
         public NativeArray<T> GetInnerArray() => array;
-        public ReadOnly AsReadOnly() => new ReadOnly(this);
+        public ReadOnly AsReadOnly() => new(this);
+        public ReadOnlySpan<T> AsReadOnlySpan() => AsReadOnly().AsReadOnlySpan();
+        public IdEnumerator<Id> Ids => AsReadOnly().Ids;
+        public IdValueEnumerator<Id, T> IdsValues => AsReadOnly().IdsValues;
 
         #region ReadOnly
         public struct ReadOnly
@@ -52,8 +56,12 @@ namespace andywiecko.BurstCollections
 
             public void CopyTo(T[] array) => this.array.CopyTo(array);
             public void CopyTo(NativeArray<T> array) => this.array.CopyTo(array);
-            public NativeIndexedArray<Id, U>.ReadOnly Reinterpret<U>() where U : unmanaged => new NativeIndexedArray<Id, U>.ReadOnly() { array = array.Reinterpret<U>() };
+            public NativeIndexedArray<Id, U>.ReadOnly Reinterpret<U>() where U : unmanaged => new() { array = array.Reinterpret<U>() };
             public T[] ToArray() => array.ToArray();
+            public NativeArray<T>.ReadOnly.Enumerator GetEnumerator() => array.GetEnumerator();
+            unsafe public ReadOnlySpan<T> AsReadOnlySpan() => new(array.GetUnsafeReadOnlyPtr(), Length);
+            public IdEnumerator<Id> Ids => new(start: 0, Length);
+            public IdValueEnumerator<Id, T> IdsValues => new(AsReadOnlySpan());
         }
         #endregion
     }

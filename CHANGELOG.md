@@ -1,5 +1,12 @@
 # Change log
 
+## [1.2.0] - 2021-12-09
+
+### Features
+
+- `IdEnumerator<Id>` and `IdValueEnumerator<Id, T>` added.
+- Unity version update: 2021.2.5f1.
+
 ## [1.1.0] - 2021-12-04
 
 ### Features

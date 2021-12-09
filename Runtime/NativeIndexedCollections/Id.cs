@@ -8,7 +8,7 @@ namespace andywiecko.BurstCollections
     {
         public static readonly Id<T> Invalid = new Id<T>(-1);
         public static readonly Id<T> Zero = new Id<T>(0);
-        
+
         public readonly int Value { get; }
 
         public bool IsValid => Value != -1;
@@ -37,7 +37,7 @@ namespace andywiecko.BurstCollections
         public static Id<T> operator -(Id<T> left, int right) => new Id<T>(left.Value - right);
         public static Id<T> operator +(int left, Id<T> right) => new Id<T>(left + right.Value);
         public static Id<T> operator -(int left, Id<T> right) => new Id<T>(left - right.Value);
-        public static Id<T> operator++(Id<T> id)=> new Id<T>(id.Value + 1);
-        public static Id<T> operator--(Id<T> id)=> new Id<T>(id.Value - 1);
+        public static Id<T> operator ++(Id<T> id) => new Id<T>(id.Value + 1);
+        public static Id<T> operator --(Id<T> id) => new Id<T>(id.Value - 1);
     }
 }
