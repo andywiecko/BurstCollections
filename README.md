@@ -122,19 +122,19 @@ var neighborCount = neighborsCount[triangleId];
 ```csharp
 using var data = new NativeIndexedArray<Id<int>, int>(new[]{1, 42, 6}, Allocator.Persistent);
 
-foreach(var value in data)
+foreach (var value in data)
 {
   UnityEngine.Debug.Log(value); 
 } // Expected: 1, 42, 6.
 
-foreach(var id in data.Ids)
+foreach (var id in data.Ids)
 {
   UnityEngine.Debug.Log(id); 
 } // Expected: (Id<int>)0, (Id<int>)1, (Id<int>)2.
 
-foreach(var (id, value) in data.IdsValues)
+foreach (var (id, value) in data.IdsValues)
 {
-  UnityEngine.Debug.Log(id); 
+  UnityEngine.Debug.Log($"{id}, {value}"); 
 } // Expected: ((Id<int>)0, 1), ((Id<int>)1, 42), ((Id<int>)2, 6).
 ```
 
@@ -177,7 +177,7 @@ Traverse the tree using _Breadth First Search_ to optimize your algorithms...
 
 ```csharp
 var bfs = tree.BreadthFirstSearch;
-foreach(var (id, nodeAABB) in bfs)
+foreach (var (id, nodeAABB) in bfs)
 {
   bfs.Traverse(id);
 }
