@@ -8,13 +8,15 @@ namespace andywiecko.BurstCollections
     /// <summary>
     /// An unmanaged, fixed capacity native stack.
     /// </summary>
+    [DebuggerDisplay("Length = {Length}")]
+    [DebuggerTypeProxy(typeof(NativeStackDebugView<>))]
     public struct NativeStack<T> : INativeDisposable where T : unmanaged
     {
         public bool IsCreated => buffer.IsCreated;
         public bool IsEmpty => buffer.IsEmpty;
         public int Length => buffer.Length;
 
-        private NativeList<T> buffer;
+        internal NativeList<T> buffer;
 
         public NativeStack(int capacity, Allocator allocator)
         {
