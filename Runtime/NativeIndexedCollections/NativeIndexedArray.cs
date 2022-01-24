@@ -42,8 +42,14 @@ namespace andywiecko.BurstCollections
         public NativeArray<T> GetInnerArray() => array;
         public ReadOnly AsReadOnly() => new(this);
         public ReadOnlySpan<T> AsReadOnlySpan() => AsReadOnly().AsReadOnlySpan();
+        unsafe public Span<T> AsSpan() => new (array.GetUnsafePtr(), Length);
+        public T[] ToArray() => array.ToArray();
+
         public IdEnumerator<Id> Ids => AsReadOnly().Ids;
         public IdValueEnumerator<Id, T> IdsValues => AsReadOnly().IdsValues;
+
+        public static implicit operator Span<T>(NativeIndexedArray<Id, T> array) => array.AsSpan();
+        public static implicit operator ReadOnlySpan<T>(NativeIndexedArray<Id, T> array) => array.AsReadOnlySpan();
 
         #region ReadOnly
         public struct ReadOnly
@@ -62,6 +68,7 @@ namespace andywiecko.BurstCollections
             unsafe public ReadOnlySpan<T> AsReadOnlySpan() => new(array.GetUnsafeReadOnlyPtr(), Length);
             public IdEnumerator<Id> Ids => new(start: 0, Length);
             public IdValueEnumerator<Id, T> IdsValues => new(AsReadOnlySpan());
+            public static implicit operator ReadOnlySpan<T>(ReadOnly array) => array.AsReadOnlySpan();
         }
         #endregion
     }
