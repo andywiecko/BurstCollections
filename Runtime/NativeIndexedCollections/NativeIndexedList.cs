@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
@@ -10,6 +11,8 @@ namespace andywiecko.BurstCollections
     /// <summary>
     /// Wrapper for <see cref="NativeList{T}"/> which supports indexing via <see cref="Id{T}"/> instead of <see langword="int"/>.
     /// </summary>
+    [DebuggerDisplay("Length = {Length}")]
+    [DebuggerTypeProxy(typeof(NativeIndexedListDebugView<,>))]
     public struct NativeIndexedList<Id, T> : INativeDisposable, IEnumerable<T>
         where T : unmanaged
         where Id : unmanaged, IIndexer

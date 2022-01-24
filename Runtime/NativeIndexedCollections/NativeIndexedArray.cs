@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
@@ -10,6 +11,8 @@ namespace andywiecko.BurstCollections
     /// <summary>
     /// Wrapper for <see cref="NativeArray{T}"/> which supports indexing via <see cref="Id{T}"/> instead of <see langword="int"/>.
     /// </summary>
+    [DebuggerDisplay("Length = {Length}")]
+    [DebuggerTypeProxy(typeof(NativeIndexedArrayDebugView<,>))]
     public struct NativeIndexedArray<Id, T> : INativeDisposable, IEnumerable<T>, IEnumerable, IEquatable<NativeIndexedArray<Id, T>>
         where Id : unmanaged, IIndexer
         where T : unmanaged
@@ -52,6 +55,8 @@ namespace andywiecko.BurstCollections
         public static implicit operator ReadOnlySpan<T>(NativeIndexedArray<Id, T> array) => array.AsReadOnlySpan();
 
         #region ReadOnly
+        [DebuggerDisplay("Length = {Length}")]
+        [DebuggerTypeProxy(typeof(NativeIndexedArrayReadOnlyDebugView<,>))]
         public struct ReadOnly
         {
             public T this[Id index] => array[index.Value];
