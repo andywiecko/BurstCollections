@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
@@ -10,6 +11,8 @@ namespace andywiecko.BurstCollections
     /// <summary>
     /// Wrapper for <see cref="NativeList{T}"/> which supports indexing via <see cref="Id{T}"/> instead of <see langword="int"/>.
     /// </summary>
+    [DebuggerDisplay("Length = {Length}")]
+    [DebuggerTypeProxy(typeof(NativeIndexedListDebugView<,>))]
     public struct NativeIndexedList<Id, T> : INativeDisposable, IEnumerable<T>
         where T : unmanaged
         where Id : unmanaged, IIndexer
@@ -54,8 +57,11 @@ namespace andywiecko.BurstCollections
         public NativeIndexedArray<Id, T>.ReadOnly AsParallelReader() => new() { array = list.AsParallelReader() };
         public ParallelWriter AsParallelWriter() => new(this);
         unsafe public ReadOnlySpan<T> AsReadOnlySpan() => new(list.GetUnsafeReadOnlyPtr(), Length);
+        unsafe public Span<T> AsSpan() => new(list.GetUnsafePtr(), Length);
         public IdEnumerator<Id> Ids => new(start: 0, Length);
         public IdValueEnumerator<Id, T> IdsValues => new(AsReadOnlySpan());
+        public static implicit operator Span<T>(NativeIndexedList<Id, T> array) => array.AsSpan();
+        public static implicit operator ReadOnlySpan<T>(NativeIndexedList<Id, T> array) => array.AsReadOnlySpan();
 
         public struct ParallelWriter
         {

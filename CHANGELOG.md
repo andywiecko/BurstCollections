@@ -1,5 +1,12 @@
 # Change log
 
+## [1.3.0] - 2022-01-24
+
+### Features
+
+- `Span<T>` and `ReadOnlySpan<T>` support for Native Indexed Collections added.
+- Debug View for `NativeIndexedArray`, `NativeIndexedList`, and `NativeStack` added.
+
 ## [1.2.0] - 2021-12-09
 
 ### Features

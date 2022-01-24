@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
@@ -10,6 +11,8 @@ namespace andywiecko.BurstCollections
     /// <summary>
     /// Wrapper for <see cref="NativeArray{T}"/> which supports indexing via <see cref="Id{T}"/> instead of <see langword="int"/>.
     /// </summary>
+    [DebuggerDisplay("Length = {Length}")]
+    [DebuggerTypeProxy(typeof(NativeIndexedArrayDebugView<,>))]
     public struct NativeIndexedArray<Id, T> : INativeDisposable, IEnumerable<T>, IEnumerable, IEquatable<NativeIndexedArray<Id, T>>
         where Id : unmanaged, IIndexer
         where T : unmanaged
@@ -42,10 +45,18 @@ namespace andywiecko.BurstCollections
         public NativeArray<T> GetInnerArray() => array;
         public ReadOnly AsReadOnly() => new(this);
         public ReadOnlySpan<T> AsReadOnlySpan() => AsReadOnly().AsReadOnlySpan();
+        unsafe public Span<T> AsSpan() => new (array.GetUnsafePtr(), Length);
+        public T[] ToArray() => array.ToArray();
+
         public IdEnumerator<Id> Ids => AsReadOnly().Ids;
         public IdValueEnumerator<Id, T> IdsValues => AsReadOnly().IdsValues;
 
+        public static implicit operator Span<T>(NativeIndexedArray<Id, T> array) => array.AsSpan();
+        public static implicit operator ReadOnlySpan<T>(NativeIndexedArray<Id, T> array) => array.AsReadOnlySpan();
+
         #region ReadOnly
+        [DebuggerDisplay("Length = {Length}")]
+        [DebuggerTypeProxy(typeof(NativeIndexedArrayReadOnlyDebugView<,>))]
         public struct ReadOnly
         {
             public T this[Id index] => array[index.Value];
@@ -62,6 +73,7 @@ namespace andywiecko.BurstCollections
             unsafe public ReadOnlySpan<T> AsReadOnlySpan() => new(array.GetUnsafeReadOnlyPtr(), Length);
             public IdEnumerator<Id> Ids => new(start: 0, Length);
             public IdValueEnumerator<Id, T> IdsValues => new(AsReadOnlySpan());
+            public static implicit operator ReadOnlySpan<T>(ReadOnly array) => array.AsReadOnlySpan();
         }
         #endregion
     }
