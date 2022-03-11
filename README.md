@@ -243,20 +243,20 @@ Traversing bounding volume tree made of MBC:
 
 ## Dependencies
 
-- [`Unity.Burst`](https://docs.unity3d.com/Packages/com.unity.burst@1.6/manual/index.html)
+- [`Unity.Burst`](https://docs.unity3d.com/Packages/com.unity.burst@1.7/manual/index.html)
 - [`Unity.Mathematics`](https://docs.unity3d.com/Packages/com.unity.mathematics@1.2/manual/index.html)
-- [`Unity.Collections`](https://docs.unity3d.com/Packages/com.unity.collections@1.0/manual/index.html)
-- [`Unity.Jobs`](https://docs.unity3d.com/Manual/JobSystem.html)
+- [`Unity.Collections`](https://docs.unity3d.com/Packages/com.unity.collections@1.1/manual/index.html)
+- [`Unity.Jobs`](https://docs.unity3d.com/Packages/com.unity.jobs@0.11/manual/index.html)
 
 ## TODO
 
-- Implement `.Optimize()` for `BoundingVolumeTree{T}`,
-- Implement `Depth-first search` for `BoundingVolumeTree{T}`,
-- Implement `DynamicBoundingVolumeTree{T}`,
-- Implement `NativeQuad/OctTree}`,
-- Implement `NativeGrid` (2d/3d),
-- Implement `NativeArray2d{T}`,
-- CI/CD setup.
+- [ ] Implement `.Optimize()` for `BoundingVolumeTree{T}`,
+- [ ] Implement `Depth-first search` for `BoundingVolumeTree{T}`,
+- [ ] Implement `DynamicBoundingVolumeTree{T}`,
+- [ ] Implement `NativeQuad/OctTree}`,
+- [ ] Implement `NativeGrid` (2d/3d),
+- [ ] Implement `NativeArray2d{T}`,
+- [X] ~~CI/CD setup.~~
 
 ## Contributors
 
