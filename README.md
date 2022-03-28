@@ -161,7 +161,7 @@ Currently, the package provides the following implementations
 To work with the tree one has to allocate native data by declaring the number of leaves (i.e. number of bounding volume objects from which tree will be constructed):
 
 ```csharp
-var tree = new BoundingVolumeTree(leaves: 10, Allocator.Persistent);
+var tree = new BoundingVolumeTree<AABB>(leaves: 10, Allocator.Persistent);
 var volumes = new NativeArray<AABB>(10, Allocator.Persistent);
 ```
 
