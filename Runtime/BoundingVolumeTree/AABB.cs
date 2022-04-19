@@ -20,7 +20,7 @@ namespace andywiecko.BurstCollections
             Max = max;
             Volume = (Max - Min).x * (Max - Min).y;
         }
-
+        public bool Contains(float2 point) => math.all(point >= Min & point <= Max);
         public bool Intersects(AABB other) => math.all(Max >= other.Min) && math.all(Min <= other.Max);
         public AABB Union(AABB other) => new AABB(math.min(Min, other.Min), math.max(Max, other.Max));
         public void Deconstruct(out float2 min, out float2 max) => _ = (min = Min, max = Max);

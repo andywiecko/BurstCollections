@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using Unity.Mathematics;
 
 namespace andywiecko.BurstCollections.Editor.Tests
 {
@@ -40,5 +41,16 @@ namespace andywiecko.BurstCollections.Editor.Tests
 
         [Test, TestCaseSource(nameof(AABBUnionData))]
         public AABB AABBUnionTest(AABB a, AABB b) => a.Union(b);
+
+        private static readonly TestCaseData[] AABBContainsPointTestData = new[]
+        {
+            new TestCaseData(new AABB(0, 1), (float2)0.5f){ TestName = "Test case 1", ExpectedResult = true },
+            new TestCaseData(new AABB(0, 1), (float2)2.5f){ TestName = "Test case 2", ExpectedResult = false },
+            new TestCaseData(new AABB(0, 1), -(float2)2.5f){ TestName = "Test case 3", ExpectedResult = false },
+            new TestCaseData(new AABB(0, 1), (float2)0){ TestName = "Test case 4", ExpectedResult = true },
+        };
+
+        [Test, TestCaseSource(nameof(AABBContainsPointTestData))]
+        public bool AABBContainsPointTest(AABB aabb, float2 p) => aabb.Contains(p);
     }
 }
