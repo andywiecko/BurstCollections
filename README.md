@@ -1,5 +1,7 @@
 # BurstCollections
 
+[![Editor tests](https://github.com/andywiecko/BurstCollections/actions/workflows/test.yml/badge.svg)](https://github.com/andywiecko/BurstCollections/actions/workflows/test.yml)
+
 Burst friendly (special) native collections for Unity.
 
 - [BurstCollections](#burstcollections)
