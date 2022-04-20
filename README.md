@@ -8,6 +8,7 @@ Burst friendly (special) native collections for Unity.
   - [NativeAccumulatedProduct{T, Op}](#nativeaccumulatedproductt-op)
   - [NativeIndexedArray{Id, T}](#nativeindexedarrayid-t)
   - [NativeIndexedList{Id, T}](#nativeindexedlistid-t)
+  - [Native2dTree](#native2dtree)
   - [BoundingVolumeTree{T}](#boundingvolumetreet)
     - [Example usage](#example-usage)
     - [Results](#results)
@@ -143,6 +144,34 @@ foreach (var (id, value) in data.IdsValues)
 Wrapper for `NativeList<T>` which supports indexing via `Id<T>` instead of `int`, where `T` is a non-constraint generic parameter.
 See [NativeIndexedArray{Id, T}](#nativeindexedarrayid-t) for more details.
 
+## Native2dTree
+
+The package supports basic implementation of [_k_-d tree](https://en.wikipedia.org/wiki/K-d_tree) for _k_=2.
+The following structure is especially useful for range searches and nearest neighbor queries.
+
+Example usage:
+
+```csharp
+using var result = new NativeList<int>(64, Allocator.Persistent);
+using var tree = new Native2dTree(6, Allocator.Persistent);
+using var positions = new NativeArray<float2>(new float2[]
+{
+  new(7, 2), new(5, 4), new(9, 6), new(2, 3), new(4, 7), new(8, 1)
+}, Allocator.Persistent);
+
+tree.Construct(positions);
+
+// Expected result: (2, 3), (5, 4)
+tree.RangeSearch(range: new AABB(0, 6), positions, result); 
+```
+
+Currently, only `RangeSearch` with `AABB` range is implemented.
+Below one can find performance benchmark for the structure (tested on Intel i7-4790K @ 4GHz).
+
+![kd-tree](Documentation~/kdtree.svg)
+
+An advanced usage of 2d-tree can be found at [**Flocking**](https://github.com/andywiecko/Flocking) repository.
+
 ## BoundingVolumeTree{T}
 
 A bounding volume tree is a data structure that is especially useful as supporting operations during collision detection or ray tracing algorithms.
@@ -255,7 +284,7 @@ Traversing bounding volume tree made of MBC:
 - [ ] Implement `DynamicBoundingVolumeTree{T}`,
 - [ ] Implement `NativeQuad/OctTree}`,
 - [ ] Implement `NativeGrid` (2d/3d),
-- [ ] Implement `NativeArray2d{T}`,
+- [X] ~~Implement `NativeArray2d{T}`,~~
 - [X] ~~CI/CD setup.~~
 
 ## Contributors
