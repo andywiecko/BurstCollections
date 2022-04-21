@@ -8,6 +8,7 @@ Burst friendly (special) native collections for Unity.
   - [Getting started](#getting-started)
   - [NativeStack{T}](#nativestackt)
   - [NativeAccumulatedProduct{T, Op}](#nativeaccumulatedproductt-op)
+  - [NativeArray2d{T}](#nativearray2dt)
   - [NativeIndexedArray{Id, T}](#nativeindexedarrayid-t)
   - [NativeIndexedList{Id, T}](#nativeindexedlistid-t)
   - [Native2dTree](#native2dtree)
@@ -89,6 +90,35 @@ Supported operations:
 - `int/int2/int3/int4`: `Int(2/3/4)Sum`, `Int(2/3/4)Min`, `Int(2/3/4)Max`,
 - `float/float2/float3/float4`: `Float(2/3/4)Sum`, `Float(2/3/4)Min`, `Float(2/3/4)Max`,
 - `AABB`: `AABBUnion`.
+
+## NativeArray2d{T}
+
+Wrapper for two-dimensional `NativeArray<T>` (matrix 2d).
+Matrix elements are stored in the same notation as in C# two-dimensional arrays, example
+
+```csharp
+int[,] managed =
+{
+  {0, 1, 2 },
+  {3, 4, 5 },
+  {6, 7, 8 },
+  {9, 10, 11 }
+};
+var array = new NativeArray2d<int>(managed, Allocator.Persistent);
+
+// Element access
+array[0, 0] = 100;
+var b = array[1, 1];
+
+// Row access
+var row = array.GetRow(1);
+foreach(var i in row)
+{
+  Debug.Log(i); // Expected: 3, 4, 5
+}
+
+array.Dispose();
+```
 
 ## NativeIndexedArray{Id, T}
 
