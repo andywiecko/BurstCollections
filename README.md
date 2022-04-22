@@ -12,7 +12,7 @@ Burst friendly (special) native collections for Unity.
   - [NativeIndexedArray{Id, T}](#nativeindexedarrayid-t)
   - [NativeIndexedList{Id, T}](#nativeindexedlistid-t)
   - [Native2dTree](#native2dtree)
-  - [BoundingVolumeTree{T}](#boundingvolumetreet)
+  - [NativeBoundingVolumeTree{T}](#nativeboundingvolumetreet)
     - [Example usage](#example-usage)
     - [Results](#results)
   - [Dependencies](#dependencies)
@@ -204,12 +204,12 @@ Below one can find performance benchmark for the structure (tested on Intel i7-4
 
 An advanced usage of 2d-tree can be found at [**Flocking**](https://github.com/andywiecko/Flocking) repository.
 
-## BoundingVolumeTree{T}
+## NativeBoundingVolumeTree{T}
 
 A bounding volume tree is a data structure that is especially useful as supporting operations during collision detection or ray tracing algorithms.
 Briefly, it allows reducing the number of checks from _O(n²)_ to _O(nk)_.
 
-`BoundingVolumeTree{T}` requires that generic parameter `T` implements the `IBoundingVolume<TSelf>` interface.
+`NativeBoundingVolumeTree{T}` requires that generic parameter `T` implements the `IBoundingVolume<TSelf>` interface.
 Currently, the package provides the following implementations
 
 - `AABB` –⁠ [axis-aligned bounding box][aabb] (two dimensional),
@@ -222,7 +222,7 @@ Currently, the package provides the following implementations
 To work with the tree one has to allocate native data by declaring the number of leaves (i.e. number of bounding volume objects from which tree will be constructed):
 
 ```csharp
-var tree = new BoundingVolumeTree<AABB>(leaves: 10, Allocator.Persistent);
+var tree = new NativeBoundingVolumeTree<AABB>(leaves: 10, Allocator.Persistent);
 var volumes = new NativeArray<AABB>(10, Allocator.Persistent);
 ```
 
@@ -237,7 +237,7 @@ When the volumes are static (over time) then this is it.
 Traverse the tree using _Breadth First Search_ to optimize your algorithms...
 
 ```csharp
-var bfs = tree.BreadthFirstSearch;
+var bfs = tree.BreadthFirstSearch();
 foreach (var (id, nodeAABB) in bfs)
 {
   bfs.Traverse(id);
@@ -266,7 +266,7 @@ volumes.Dispose();
 To summarize below one can find the MWE
 
 ```csharp
-var tree = new BoundingVolumeTree<AABB>(leavesCount: 4, Allocator.Persistent);
+var tree = new NativeBoundingVolumeTree<AABB>(leavesCount: 4, Allocator.Persistent);
 var volumes = new NativeArray<AABB>(4, Allocator.Persistent);
 
 tree.Construct(volumes.AsReadOnly());
@@ -290,7 +290,7 @@ result.Dispose();
 
 ### Results
 
-Below one can find an example result of the constructed `BoundingVolumeTree{T}` for `AABB` and `MBC`, respectively.
+Below one can find an example result of the constructed `NativeBoundingVolumeTree{T}` for `AABB` and `MBC`, respectively.
 The tree was constructed from triangle mesh marked with blue.
 On each frame of the `.gif` animations, one can see the contours of the bounding volumes for the given tree level.
 
