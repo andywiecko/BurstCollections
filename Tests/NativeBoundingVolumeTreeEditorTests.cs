@@ -6,9 +6,9 @@ using Unity.Mathematics;
 
 namespace andywiecko.BurstCollections.Editor.Tests
 {
-    public class BoundingVolumeTreeEditorTests
+    public class NativeBoundingVolumeTreeEditorTests
     {
-        private BoundingVolumeTree<AABB> tree;
+        private NativeBoundingVolumeTree<AABB> tree;
         private NativeArray<AABB> volumes;
 
         [TearDown]
@@ -29,14 +29,14 @@ namespace andywiecko.BurstCollections.Editor.Tests
         public void NodesCountTest()
         {
             var leavesCount = 4;
-            tree = new BoundingVolumeTree<AABB>(leavesCount, Allocator.Persistent);
+            tree = new NativeBoundingVolumeTree<AABB>(leavesCount, Allocator.Persistent);
             Assert.That(tree.Nodes.Length, Is.EqualTo(2 * leavesCount - 1));
         }
 
         [Test]
         public void ClearTest()
         {
-            tree = new BoundingVolumeTree<AABB>(1, Allocator.Persistent);
+            tree = new NativeBoundingVolumeTree<AABB>(1, Allocator.Persistent);
             tree.RootId.Value = 42;
             tree.Clear();
             Assert.That(tree.RootId.Value, Is.EqualTo(-1));
@@ -46,14 +46,14 @@ namespace andywiecko.BurstCollections.Editor.Tests
         public void BreadthFirstSearchTest()
         {
             var visitedNodes = new List<int>();
-            tree = new BoundingVolumeTree<AABB>(leavesCount: 4, Allocator.Persistent);
+            tree = new NativeBoundingVolumeTree<AABB>(leavesCount: 4, Allocator.Persistent);
             tree.RootId.Value = 0;
             //       0
             //     /   \
             //    1     2
             //   / \   / \
             //  3   4 5   6
-            tree.Nodes.CopyFrom(new BoundingVolumeTree<AABB>.Node[]
+            tree.Nodes.CopyFrom(new NativeBoundingVolumeTree<AABB>.Node[]
             {
                 (parent:-1, left: 1, right: 2),
                 (parent: 0, left: 3, right: 4),
@@ -64,7 +64,7 @@ namespace andywiecko.BurstCollections.Editor.Tests
                 (parent: 2, left:-1, right:-1),
             });
 
-            var bfs = tree.BreadthFirstSearch;
+            var bfs = tree.BreadthFirstSearch();
             foreach (var (id, _) in bfs)
             {
                 visitedNodes.Add(id);
@@ -77,7 +77,7 @@ namespace andywiecko.BurstCollections.Editor.Tests
         [Test]
         public void ConstructTreeNodesTest()
         {
-            tree = new BoundingVolumeTree<AABB>(leavesCount: 4, Allocator.Persistent);
+            tree = new NativeBoundingVolumeTree<AABB>(leavesCount: 4, Allocator.Persistent);
             //  __________________
             // |                  |
             // |    X         X   |
@@ -94,7 +94,7 @@ namespace andywiecko.BurstCollections.Editor.Tests
 
             tree.Construct(volumes.AsReadOnly());
 
-            var expectedNodes = new BoundingVolumeTree<AABB>.Node[]
+            var expectedNodes = new NativeBoundingVolumeTree<AABB>.Node[]
             {
                 (parent: 4, left:-1, right:-1),
                 (parent: 4, left:-1, right:-1),
@@ -110,7 +110,7 @@ namespace andywiecko.BurstCollections.Editor.Tests
         [Test]
         public void ConstructTreeVolumesTest()
         {
-            tree = new BoundingVolumeTree<AABB>(leavesCount: 4, Allocator.Persistent);
+            tree = new NativeBoundingVolumeTree<AABB>(leavesCount: 4, Allocator.Persistent);
             //  __________________
             // |                  |
             // |    X         X   |
@@ -143,7 +143,7 @@ namespace andywiecko.BurstCollections.Editor.Tests
         [Test]
         public void UpdateVolumesTest()
         {
-            tree = new BoundingVolumeTree<AABB>(leavesCount: 4, Allocator.Persistent);
+            tree = new NativeBoundingVolumeTree<AABB>(leavesCount: 4, Allocator.Persistent);
             tree.RootId.Value = 6;
             //        6
             //      /   \
@@ -152,7 +152,7 @@ namespace andywiecko.BurstCollections.Editor.Tests
             //  0     4
             //       / \
             //      1   2
-            tree.Nodes.CopyFrom(new BoundingVolumeTree<AABB>.Node[]
+            tree.Nodes.CopyFrom(new NativeBoundingVolumeTree<AABB>.Node[]
             {
                 (parent: 5, left:-1, right:-1),
                 (parent: 4, left:-1, right:-1),
@@ -190,7 +190,7 @@ namespace andywiecko.BurstCollections.Editor.Tests
         [Test]
         public void ThrowWhenNotConstructedTest()
         {
-            tree = new BoundingVolumeTree<AABB>(4, Allocator.Persistent);
+            tree = new NativeBoundingVolumeTree<AABB>(4, Allocator.Persistent);
             volumes = new NativeArray<AABB>(4, Allocator.Persistent);
             Assert.Throws<Exception>(() => tree.UpdateLeavesVolumes(volumes.AsReadOnly()));
         }
@@ -198,7 +198,7 @@ namespace andywiecko.BurstCollections.Editor.Tests
         [Test]
         public void ThrowWhenLengthsAreWrong()
         {
-            tree = new BoundingVolumeTree<AABB>(4, Allocator.Persistent);
+            tree = new NativeBoundingVolumeTree<AABB>(4, Allocator.Persistent);
             volumes = new NativeArray<AABB>(3, Allocator.Persistent);
             Assert.Throws<InvalidOperationException>(() => tree.Construct(volumes.AsReadOnly()));
         }

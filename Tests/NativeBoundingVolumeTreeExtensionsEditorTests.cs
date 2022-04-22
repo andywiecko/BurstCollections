@@ -4,19 +4,19 @@ using Unity.Mathematics;
 
 namespace andywiecko.BurstCollections.Editor.Tests
 {
-    public class BoundingVolumeTreeExtensionsEditorTests
+    public class NativeBoundingVolumeTreeExtensionsEditorTests
     {
         [Test]
         public void TreeAABBGetIntersectionsWithAABBTest()
         {
-            var tree = new BoundingVolumeTree<AABB>(leavesCount: 4, Allocator.Persistent);
+            var tree = new NativeBoundingVolumeTree<AABB>(leavesCount: 4, Allocator.Persistent);
             //       6
             //     /   \
             //    4     5
             //   / \   / \
             //  0   1 2   3
             tree.RootId.Value = 6;
-            tree.Nodes.CopyFrom(new BoundingVolumeTree<AABB>.Node[]
+            tree.Nodes.CopyFrom(new NativeBoundingVolumeTree<AABB>.Node[]
             {
                 (parent: 4, left:-1, right:-1),
                 (parent: 4, left:-1, right:-1),
