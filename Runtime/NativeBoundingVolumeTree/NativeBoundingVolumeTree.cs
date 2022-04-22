@@ -6,32 +6,22 @@ using Unity.Jobs;
 
 namespace andywiecko.BurstCollections
 {
-    /// <summary>
-    /// Burst friendly implementation of the native bounding volume tree.
-    /// </summary>
+    [Obsolete("Use " + nameof(NativeBoundingVolumeTree<AABB>) + " instead!")]
     public struct BoundingVolumeTree<T> : INativeDisposable where T : unmanaged, IBoundingVolume<T>
     {
         private const int None = -1;
 
-        public BFSEnumerator BreadthFirstSearch => new BFSEnumerator(this);
-        public bool IsCreated => Nodes.IsCreated;
-        public bool IsEmpty => RootId.Value == None;
-        public int LeavesCount { get; }
-
         #region BFS
-        /// <summary>
-        /// See wikipage about <see href="https://en.wikipedia.org/wiki/Breadth-first_search">Breadth-first search (BFS)</see>.
-        /// </summary>
         public struct BFSEnumerator
         {
-            private BoundingVolumeTree<T> owner;
+            private NativeBoundingVolumeTree<T> owner;
             public (int, T) Current { get; private set; }
 
-            public BFSEnumerator(BoundingVolumeTree<T> owner)
+            public BFSEnumerator(NativeBoundingVolumeTree<T> owner)
             {
                 this.owner = owner;
 
-                CheckIfTreeIsConstructed(owner.RootId);
+                NativeBoundingVolumeTree<T>.CheckIfTreeIsConstructed(owner.RootId.Value);
 
                 var root = owner.RootId.Value;
                 Current = (root, owner.Volumes[root]);
@@ -100,14 +90,132 @@ namespace andywiecko.BurstCollections
         }
         #endregion
 
+        public BFSEnumerator BreadthFirstSearch => new BFSEnumerator(tree);
+        public bool IsCreated => tree.IsCreated;
+        public bool IsEmpty => tree.IsEmpty;
+        public int LeavesCount => tree.LeavesCount;
+        public NativeArray<Node> Nodes => tree.Nodes.Reinterpret<Node>();
+        public NativeArray<T> Volumes => tree.Volumes;
+        public NativeReference<int> RootId => tree.RootId;
+        internal NativeBoundingVolumeTree<T> tree;
+        public BoundingVolumeTree(int leavesCount, Allocator allocator) => tree = new NativeBoundingVolumeTree<T>(leavesCount, allocator);
+        public JobHandle Dispose(JobHandle dependencies) => tree.Dispose(dependencies);
+        public void Dispose() => tree.Dispose();
+        public void Clear() => tree.Clear();
+        public void Construct(NativeArray<T>.ReadOnly volumes) => tree.Construct(volumes);
+        public JobHandle Construct(NativeArray<T>.ReadOnly volumes, JobHandle dependencies) => tree.Construct(volumes, dependencies);
+        public void UpdateLeavesVolumes(NativeArray<T>.ReadOnly volumes) => tree.UpdateLeavesVolumes(volumes);
+        public JobHandle UpdateLeafesVolumes(NativeArray<T>.ReadOnly volumes, JobHandle dependencies) => tree.UpdateLeavesVolumes(volumes, dependencies);
+    }
+
+    /// <summary>
+    /// Burst friendly implementation of the native bounding volume tree.
+    /// </summary>
+    public struct NativeBoundingVolumeTree<T> : INativeDisposable where T : unmanaged, IBoundingVolume<T>
+    {
+        private const int None = -1;
+
+        public bool IsCreated => Nodes.IsCreated;
+        public bool IsEmpty => RootId.Value == None;
+        public int LeavesCount { get; }
+
+        #region BFS
+        /// <summary>
+        /// See wikipage about <see href="https://en.wikipedia.org/wiki/Breadth-first_search">Breadth-first search (BFS)</see>.
+        /// </summary>
+        public struct BFSEnumerator
+        {
+            public (int, T) Current { get; private set; }
+
+            private NativeArray<Node>.ReadOnly nodes;
+            private NativeArray<T>.ReadOnly volumes;
+            private NativeReference<int>.ReadOnly rootId;
+            private NativeQueue<int> queue;
+
+            public BFSEnumerator(ReadOnly owner, NativeQueue<int> queue)
+            {
+                this.nodes = owner.Nodes;
+                this.volumes = owner.Volumes;
+                this.rootId = owner.RootId;
+                this.queue = queue;
+
+                CheckIfTreeIsConstructed(rootId.Value);
+
+                var root = rootId.Value;
+                Current = (root, volumes[root]);
+
+                queue.Clear();
+                queue.Enqueue(root);
+            }
+
+            public bool IsLeaf(int id) => nodes[id].IsLeaf;
+
+            public void Traverse(int id)
+            {
+                var n = nodes[id];
+                if (!n.IsLeaf)
+                {
+                    queue.Enqueue(n.LeftChildId);
+                    queue.Enqueue(n.RightChildId);
+                }
+            }
+
+            public bool MoveNext()
+            {
+                var isEmpty = queue.IsEmpty();
+                if (isEmpty)
+                {
+                    return false;
+                }
+                else
+                {
+                    var id = queue.Dequeue();
+                    Current = (id, volumes[id]);
+                    return true;
+                }
+            }
+
+            public BFSEnumerator GetEnumerator() => this;
+        }
+        #endregion
+
+        #region Node
+        public readonly struct Node
+        {
+            public bool IsRoot => ParentId == None;
+            public bool IsLeaf => !LeftChildIsValid && !RightChildIsValid;
+            public bool ParentIsValid => ParentId != None;
+            public bool LeftChildIsValid => LeftChildId != None;
+            public bool RightChildIsValid => RightChildId != None;
+
+            public readonly int ParentId;
+            public readonly int LeftChildId;
+            public readonly int RightChildId;
+
+            public Node(int parentId, int leftChild, int rightChild)
+            {
+                ParentId = parentId;
+                LeftChildId = leftChild;
+                RightChildId = rightChild;
+            }
+
+            public static implicit operator Node((int parent, int left, int right) n) => new Node(n.parent, n.left, n.right);
+            public Node WithParent(int parentId) => new Node(parentId, LeftChildId, RightChildId);
+            public Node WithLeftChild(int childId) => new Node(ParentId, childId, RightChildId);
+            public Node WithRightChild(int childId) => new Node(ParentId, LeftChildId, childId);
+            public void Deconstruct(out int parentId, out int leftChildId, out int rightChildId) => _ =
+                (parentId = ParentId, leftChildId = LeftChildId, rightChildId = RightChildId);
+        }
+        #endregion
+
         #region Jobs
         [BurstCompile]
         private struct ConstructJob : IJob
         {
-            private BoundingVolumeTree<T> tree;
+            private NativeBoundingVolumeTree<T> tree;
             private NativeArray<T>.ReadOnly volumes;
 
-            public ConstructJob(BoundingVolumeTree<T> tree, NativeArray<T>.ReadOnly volumes)
+            public ConstructJob(NativeBoundingVolumeTree<T> tree, NativeArray<T>.ReadOnly volumes)
             {
                 this.tree = tree;
                 this.volumes = volumes;
@@ -119,10 +227,10 @@ namespace andywiecko.BurstCollections
         [BurstCompile]
         private struct UpdateLeafesVolumesJob : IJob
         {
-            private BoundingVolumeTree<T> tree;
+            private NativeBoundingVolumeTree<T> tree;
             private NativeArray<T>.ReadOnly volumes;
 
-            public UpdateLeafesVolumesJob(BoundingVolumeTree<T> tree, NativeArray<T>.ReadOnly volumes)
+            public UpdateLeafesVolumesJob(NativeBoundingVolumeTree<T> tree, NativeArray<T>.ReadOnly volumes)
             {
                 this.tree = tree;
                 this.volumes = volumes;
@@ -132,15 +240,37 @@ namespace andywiecko.BurstCollections
         }
         #endregion
 
+        #region ReadOnly
+        public struct ReadOnly
+        {
+            public bool IsEmpty => RootId.Value == None;
+            public int LeavesCount { get; }
+
+            public NativeArray<Node>.ReadOnly Nodes;
+            public NativeArray<T>.ReadOnly Volumes;
+            public NativeReference<int>.ReadOnly RootId;
+
+            internal ReadOnly(NativeBoundingVolumeTree<T> owner)
+            {
+                Nodes = owner.Nodes.AsReadOnly();
+                Volumes = owner.Volumes.AsReadOnly();
+                RootId = owner.RootId.AsReadOnly();
+                LeavesCount = owner.LeavesCount;
+            }
+
+            public BFSEnumerator BreadthFirstSearch(NativeQueue<int> queue) => new BFSEnumerator(this, queue);
+        }
+        #endregion
+
         public NativeArray<Node> Nodes;
         public NativeArray<T> Volumes;
         public NativeReference<int> RootId;
 
-        private NativeReference<int> currentInternalCount;
-        private NativeQueue<int> tmpNodesQueue;
-        private NativeStack<int> tmpNodesStack;
+        internal NativeReference<int> currentInternalCount;
+        internal NativeQueue<int> tmpNodesQueue;
+        internal NativeStack<int> tmpNodesStack;
 
-        public BoundingVolumeTree(int leavesCount, Allocator allocator)
+        public NativeBoundingVolumeTree(int leavesCount, Allocator allocator)
         {
             LeavesCount = leavesCount;
             var length = 2 * leavesCount - 1;
@@ -174,6 +304,8 @@ namespace andywiecko.BurstCollections
             tmpNodesStack.Dispose();
         }
 
+        public BFSEnumerator BreadthFirstSearch() => new BFSEnumerator(AsReadOnly(), tmpNodesQueue);
+        public ReadOnly AsReadOnly() => new ReadOnly(this);
         public void Clear() => RootId.Value = None;
 
         /// <summary>
@@ -213,7 +345,7 @@ namespace andywiecko.BurstCollections
         /// </summary>
         public void UpdateLeavesVolumes(NativeArray<T>.ReadOnly volumes)
         {
-            CheckIfTreeIsConstructed(RootId);
+            CheckIfTreeIsConstructed(RootId.Value);
             CheckLengths(volumes, LeavesCount);
 
             for (int i = 0; i < volumes.Length; i++)
@@ -227,12 +359,12 @@ namespace andywiecko.BurstCollections
         /// <summary>
         /// Update leaves <paramref name="volumes"/> and all internal tree nodes (jobified).
         /// </summary>
-        public JobHandle UpdateLeafesVolumes(NativeArray<T>.ReadOnly volumes, JobHandle dependencies) =>
+        public JobHandle UpdateLeavesVolumes(NativeArray<T>.ReadOnly volumes, JobHandle dependencies) =>
             new UpdateLeafesVolumesJob(this, volumes).Schedule(dependencies);
 
         private void RecalculateVolumes()
         {
-            var bfs = BreadthFirstSearch;
+            var bfs = BreadthFirstSearch();
             foreach (var (id, _) in bfs)
             {
                 if (!bfs.IsLeaf(id))
@@ -380,13 +512,13 @@ namespace andywiecko.BurstCollections
         }
 
         [Conditional("ENABLE_UNITY_COLLECTIONS_CHECKS")]
-        private static void CheckIfTreeIsConstructed(NativeReference<int> rootId)
+        internal static void CheckIfTreeIsConstructed(int rootId)
         {
-            if (rootId.Value == None)
+            if (rootId == None)
             {
                 throw new Exception
                 (
-                    $"{nameof(BoundingVolumeTree<T>)} has not been constructed! " +
+                    $"{nameof(NativeBoundingVolumeTree<T>)} has not been constructed! " +
                     $"One should construct tree before using it."
                 );
             }
