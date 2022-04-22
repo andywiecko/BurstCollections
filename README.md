@@ -250,10 +250,31 @@ foreach (var (id, nodeAABB) in bfs)
 tree.GetIntersectionsWithAABB(aabb, result);
 ```
 
-In the case when your objects are not static, you have to update the leaves volumes during your simulation you could inject this into the Unity jobs pipeline as well)
+The package provides also intersections between two trees:
+
+```csharp
+using var tree1 = new NativeBoundingVolumeTree<AABB>(10, Allocator.Persistent);
+using var tree2 = new NativeBoundingVolumeTree<AABB>(10, Allocator.Persistent);
+using var result = new NativeList<int2>(64, Allocator.Persistent);
+
+// ...
+
+tree1.GetIntersectionsWithTree(tree2, result);
+```
+
+The result is stored in a list of `int2` where `int2.x` and `int2.y` correspond to `tree1` and `tree2` leaf index respectively.
+
+In the case when your objects are not static, you have to update the leaves volumes during your simulation (you could inject this into the Unity jobs pipeline as well)
 
 ```csharp
 tree.UpdateLeavesVolumes(volumes);
+```
+
+The tree supports also `ReadOnly` substruct, which could be used especially while working with parallel jobs
+
+```csharp
+using var tree = new NativeBoundingVolumeTree<AABB>(4, Allocator.Persistent);
+var readOnly = tree.AsReadOnly(); 
 ```
 
 Remember to dispose of all native data related to the tree:
