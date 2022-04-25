@@ -18,8 +18,8 @@ namespace andywiecko.BurstCollections
         /// <remarks>
         /// It allocates temporary <see cref="NativeQueue{T}"/> internally.
         /// </remarks>
-        public static void GetIntersectionsWithAABB(this NativeBoundingVolumeTree<AABB> tree, AABB aabb, NativeList<int> result) =>
-            GetIntersectionsWithAABB(tree.AsReadOnly(), aabb, result);
+        public static void GetIntersectionsWithAABB<T>(this NativeBoundingVolumeTree<T> tree, T aabb, NativeList<int> result)
+            where T : unmanaged, IBoundingVolume<T> => GetIntersectionsWithAABB(tree.AsReadOnly(), aabb, result);
 
         /// <summary>
         /// Collects all intersections of the <paramref name="tree"/> with given <paramref name="aabb"/>
@@ -29,7 +29,8 @@ namespace andywiecko.BurstCollections
         /// <remarks>
         /// It allocates temporary <see cref="NativeQueue{T}"/> internally.
         /// </remarks>
-        public static void GetIntersectionsWithAABB(this NativeBoundingVolumeTree<AABB>.ReadOnly tree, AABB aabb, NativeList<int> result)
+        public static void GetIntersectionsWithAABB<T>(this NativeBoundingVolumeTree<T>.ReadOnly tree, T aabb, NativeList<int> result)
+            where T : unmanaged, IBoundingVolume<T>
         {
             using var queue = new NativeQueue<int>(Allocator.Temp);
             GetIntersectionsWithAABB(tree, aabb, result, queue);
@@ -40,15 +41,16 @@ namespace andywiecko.BurstCollections
         /// and stores them in the <paramref name="result"/>.
         /// </summary>
         /// <param name="result">Indicies of the <paramref name="tree"/> leaves which intersects with <paramref name="aabb"/>.</param>
-        public static void GetIntersectionsWithAABB(this NativeBoundingVolumeTree<AABB> tree, AABB aabb, NativeList<int> result, NativeQueue<int> queue) =>
-            GetIntersectionsWithAABB(tree.AsReadOnly(), aabb, result, queue);
+        public static void GetIntersectionsWithAABB<T>(this NativeBoundingVolumeTree<T> tree, T aabb, NativeList<int> result, NativeQueue<int> queue)
+            where T : unmanaged, IBoundingVolume<T> => GetIntersectionsWithAABB(tree.AsReadOnly(), aabb, result, queue);
 
         /// <summary>
         /// Collects all intersections of the <paramref name="tree"/> with given <paramref name="aabb"/>
         /// and stores them in the <paramref name="result"/>.
         /// </summary>
         /// <param name="result">Indicies of the <paramref name="tree"/> leaves which intersects with <paramref name="aabb"/>.</param>
-        public static void GetIntersectionsWithAABB(this NativeBoundingVolumeTree<AABB>.ReadOnly tree, AABB aabb, NativeList<int> result, NativeQueue<int> queue)
+        public static void GetIntersectionsWithAABB<T>(this NativeBoundingVolumeTree<T>.ReadOnly tree, T aabb, NativeList<int> result, NativeQueue<int> queue)
+            where T : unmanaged, IBoundingVolume<T>
         {
             var bfs = tree.BreadthFirstSearch(queue);
             foreach (var (id, nodeAABB) in bfs)
@@ -74,8 +76,8 @@ namespace andywiecko.BurstCollections
         /// <remarks>
         /// It allocates temporary <see cref="NativeQueue{T}"/> internally.
         /// </remarks>
-        public static void GetIntersectionsWithTree(this NativeBoundingVolumeTree<AABB> tree, NativeBoundingVolumeTree<AABB> otherTree, NativeList<int2> result) =>
-            GetIntersectionsWithTree(tree.AsReadOnly(), otherTree.AsReadOnly(), result);
+        public static void GetIntersectionsWithTree<T>(this NativeBoundingVolumeTree<T> tree, NativeBoundingVolumeTree<T> otherTree, NativeList<int2> result)
+            where T : unmanaged, IBoundingVolume<T> => GetIntersectionsWithTree(tree.AsReadOnly(), otherTree.AsReadOnly(), result);
 
         /// <summary>
         /// Collects all intersections of the <paramref name="tree"/> with <paramref name="otherTree"/>
@@ -85,7 +87,8 @@ namespace andywiecko.BurstCollections
         /// <remarks>
         /// It allocates temporary <see cref="NativeQueue{T}"/> internally.
         /// </remarks>
-        public static void GetIntersectionsWithTree(this NativeBoundingVolumeTree<AABB>.ReadOnly tree, NativeBoundingVolumeTree<AABB>.ReadOnly otherTree, NativeList<int2> result)
+        public static void GetIntersectionsWithTree<T>(this NativeBoundingVolumeTree<T>.ReadOnly tree, NativeBoundingVolumeTree<T>.ReadOnly otherTree, NativeList<int2> result)
+            where T : unmanaged, IBoundingVolume<T>
         {
             using var queue = new NativeQueue<int2>(Allocator.Temp);
             GetIntersectionsWithTree(tree, otherTree, result, queue);
@@ -96,14 +99,16 @@ namespace andywiecko.BurstCollections
         /// and stores them in the <paramref name="result"/>.
         /// </summary>
         /// <param name="result">Indicies of the <paramref name="tree"/> and <paramref name="otherTree"/> leaves which intersects.</param>
-        public static void GetIntersectionsWithTree(this NativeBoundingVolumeTree<AABB> tree, NativeBoundingVolumeTree<AABB> otherTree, NativeList<int2> result, NativeQueue<int2> queue) => GetIntersectionsWithTree(tree.AsReadOnly(), otherTree.AsReadOnly(), result, queue);
+        public static void GetIntersectionsWithTree<T>(this NativeBoundingVolumeTree<T> tree, NativeBoundingVolumeTree<T> otherTree, NativeList<int2> result, NativeQueue<int2> queue)
+            where T : unmanaged, IBoundingVolume<T> => GetIntersectionsWithTree(tree.AsReadOnly(), otherTree.AsReadOnly(), result, queue);
 
         /// <summary>
         /// Collects all intersections of the <paramref name="tree"/> with <paramref name="otherTree"/>
         /// and stores them in the <paramref name="result"/>.
         /// </summary>
         /// <param name="result">Indicies of the <paramref name="tree"/> and <paramref name="otherTree"/> leaves which intersects.</param>
-        public static void GetIntersectionsWithTree(this NativeBoundingVolumeTree<AABB>.ReadOnly tree, NativeBoundingVolumeTree<AABB>.ReadOnly otherTree, NativeList<int2> result, NativeQueue<int2> queue)
+        public static void GetIntersectionsWithTree<T>(this NativeBoundingVolumeTree<T>.ReadOnly tree, NativeBoundingVolumeTree<T>.ReadOnly otherTree, NativeList<int2> result, NativeQueue<int2> queue)
+            where T : unmanaged, IBoundingVolume<T>
         {
             if (tree.IsEmpty || otherTree.IsEmpty)
             {
