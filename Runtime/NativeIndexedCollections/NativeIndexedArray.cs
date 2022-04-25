@@ -45,8 +45,12 @@ namespace andywiecko.BurstCollections
         public NativeArray<T> GetInnerArray() => array;
         public ReadOnly AsReadOnly() => new(this);
         public ReadOnlySpan<T> AsReadOnlySpan() => AsReadOnly().AsReadOnlySpan();
-        unsafe public Span<T> AsSpan() => new (array.GetUnsafePtr(), Length);
+        unsafe public Span<T> AsSpan() => new(array.GetUnsafePtr(), Length);
         public T[] ToArray() => array.ToArray();
+        public NativeIndexedArray<Id, U> Reinterpret<U>() where U : unmanaged => new() { array = array.Reinterpret<U>() };
+        public NativeIndexedArray<NewId, U> Reinterpret<NewId, U>() where NewId : unmanaged, IIndexer where U : unmanaged =>
+            new() { array = array.Reinterpret<U>() };
+        public NativeIndexedArray<NewId, T> ReinterpretId<NewId>() where NewId : unmanaged, IIndexer => new() { array = array };
 
         public IdEnumerator<Id> Ids => AsReadOnly().Ids;
         public IdValueEnumerator<Id, T> IdsValues => AsReadOnly().IdsValues;
