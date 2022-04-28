@@ -51,6 +51,7 @@ namespace andywiecko.BurstCollections
         public NativeIndexedArray<NewId, U> Reinterpret<NewId, U>() where NewId : unmanaged, IIndexer where U : unmanaged =>
             new() { array = array.Reinterpret<U>() };
         public NativeIndexedArray<NewId, T> ReinterpretId<NewId>() where NewId : unmanaged, IIndexer => new() { array = array };
+        unsafe public ref T ElementAt(Id id) => ref UnsafeUtility.ArrayElementAsRef<T>(array.GetUnsafePtr(), id.Value);
 
         public IdEnumerator<Id> Ids => AsReadOnly().Ids;
         public IdValueEnumerator<Id, T> IdsValues => AsReadOnly().IdsValues;
