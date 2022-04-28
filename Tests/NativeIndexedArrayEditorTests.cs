@@ -35,5 +35,13 @@ namespace andywiecko.BurstCollections.Editor.Tests
             using var array = new NativeIndexedArray<Id<Fake>, int>(new[] { 0, 1, 2, 3, 4 }, Allocator.Persistent);
             new ReadOnlyJob(array).Schedule(default).Complete();
         }
+
+        [Test]
+        public void ElementAtTest()
+        {
+            using var array = new NativeIndexedArray<Id<Fake>, int>(new[] { 0, 1, 2, 3, 4 }, Allocator.Persistent);
+            array.ElementAt((Id<Fake>)2) = 42;
+            Assert.That(array, Is.EqualTo(new[] { 0, 1, 42, 3, 4 }));
+        }
     }
 }
