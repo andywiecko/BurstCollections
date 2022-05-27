@@ -79,6 +79,8 @@ namespace andywiecko.BurstCollections
             }
         }
 
+        public ReadOnly AsReadOnly() => new(this);
+
         public JobHandle Build(NativeArray<float2> points, JobHandle dependencies)
         {
             return new BuildTreeJob(this, points).Schedule(dependencies);
@@ -227,6 +229,25 @@ namespace andywiecko.BurstCollections
             var node = Nodes[nodeId];
             ElementsIds[nodeId * NodeCapacity + node.Count] = elementId;
             Nodes.ElementAt(nodeId).Count++;
+        }
+
+        public struct ReadOnly
+        {
+            // Use NativeArray.ReadOnly instead when Unity fix the bug.
+            [ReadOnly]
+            public NativeArray<Node> Nodes;
+            [ReadOnly]
+            public NativeArray<int> ElementsIds;
+
+            public readonly int NodeCapacity;
+
+            internal ReadOnly(NativePointQuadtree tree)
+            {
+                Nodes = tree.Nodes.AsDeferredJobArray();
+                ElementsIds = tree.ElementsIds.AsDeferredJobArray();
+                NodeCapacity = tree.NodeCapacity;
+            }
+            public int GetElementId(int i, int nodeId) => ElementsIds[nodeId * NodeCapacity + i];
         }
 
         [BurstCompile]
