@@ -14,6 +14,9 @@ namespace andywiecko.BurstCollections
         public readonly float2 Min;
         public readonly float2 Max;
 
+        public readonly float2 Center => Min + 0.5f * Size;
+        public readonly float2 Size => Max - Min;
+
         public AABB(float2 min, float2 max)
         {
             Min = min;
