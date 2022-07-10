@@ -100,7 +100,7 @@ namespace andywiecko.BurstCollections.Editor.Tests
             dependencies = tmp.Combine(dependencies);
             dependencies = tmp.Reset(dependencies);
             dependencies = tmp.Combine(dependencies);
-            
+
             dependencies.Complete();
 
             Assert.That(tmp.Value, Is.EqualTo(new IntSum().NeutralElement));
