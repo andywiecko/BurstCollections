@@ -20,7 +20,7 @@ namespace andywiecko.BurstCollections
         public IdEnumerator<Id> GetEnumerator() => this;
     }
 
-    public ref struct IdValueEnumerator<Id, T> 
+    public ref struct IdValueEnumerator<Id, T>
         where Id : unmanaged, IIndexer
         where T : unmanaged
     {

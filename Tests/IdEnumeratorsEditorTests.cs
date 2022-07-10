@@ -16,9 +16,9 @@ namespace andywiecko.BurstCollections.Editor.Tests
                 result.Add(i);
             }
 
-            var expectedResult = new[] 
-            { 
-                (Id<int>)2, (Id<int>)3, (Id<int>)4, (Id<int>)5 
+            var expectedResult = new[]
+            {
+                (Id<int>)2, (Id<int>)3, (Id<int>)4, (Id<int>)5
             };
             Assert.That(result, Is.EqualTo(expectedResult));
         }
