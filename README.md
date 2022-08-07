@@ -6,16 +6,14 @@ Burst friendly (special) native collections for Unity.
 
 - [BurstCollections](#burstcollections)
   - [Getting started](#getting-started)
-  - [NativeStack{T}](#nativestackt)
+  - [Native2dTree](#native2dtree)
   - [NativeAccumulatedProduct{T, Op}](#nativeaccumulatedproductt-op)
   - [NativeArray2d{T}](#nativearray2dt)
+  - [NativeBoundingVolumeTree{T}](#nativeboundingvolumetreet)
   - [NativeIndexedArray{Id, T}](#nativeindexedarrayid-t)
   - [NativeIndexedList{Id, T}](#nativeindexedlistid-t)
-  - [Native2dTree](#native2dtree)
-  - [NativeBoundingVolumeTree{T}](#nativeboundingvolumetreet)
-    - [Example usage](#example-usage)
-    - [Results](#results)
   - [NativePointQuadtree](#nativepointquadtree)
+  - [NativeStack{T}](#nativestackt)
   - [Dependencies](#dependencies)
   - [TODO](#todo)
   - [Contributors](#contributors)
@@ -29,28 +27,33 @@ To use the package choose one of the following:
 - Use package manager via git install: `https://github.com/andywiecko/BurstCollections.git`.
   (Note: one can specify exact version with a proper tag: `https://github.com/andywiecko/BurstCollections.git#v1.4.0`)
 
-## NativeStack{T}
+## Native2dTree
 
-Simple implementation of the stack data structure.
+The package supports basic implementation of [_k_-d tree](https://en.wikipedia.org/wiki/K-d_tree) for _k_=2.
+The following structure is especially useful for range searches and nearest neighbor queries.
 
 Example usage:
 
 ```csharp
-var stack = new NativeStack<int>(capacity: 10, Allocator.Persistent);
-
-stack.Push(0);
-stack.Push(1);
-stack.Push(2);
-
-while(stack.TryPop(out var item))
+using var result = new NativeList<int>(64, Allocator.Persistent);
+using var tree = new Native2dTree(6, Allocator.Persistent);
+using var positions = new NativeArray<float2>(new float2[]
 {
-    UnityEngine.Debug.Log(item);
-} // Expected logs: 2, 1, 0
+  new(7, 2), new(5, 4), new(9, 6), new(2, 3), new(4, 7), new(8, 1)
+}, Allocator.Persistent);
 
-stack.Dispose();
+tree.Construct(positions);
+
+// Expected result: (2, 3), (5, 4)
+tree.RangeSearch(range: new AABB(0, 6), positions, result); 
 ```
 
-Remarks: implementation probably will be deprecated in the future, when Unity team add stack implementation to `Unity.Collections`.
+Currently, only `RangeSearch` with `AABB` range is implemented.
+Below one can find performance benchmark for the structure (tested on Intel i7-4790K @ 4GHz).
+
+![kd-tree](Documentation~/kdtree.svg)
+
+An advanced usage of 2d-tree can be found at [**Flocking**](https://github.com/andywiecko/Flocking) repository.
 
 ## NativeAccumulatedProduct{T, Op}
 
@@ -122,90 +125,6 @@ foreach(var i in row)
 array.Dispose();
 ```
 
-## NativeIndexedArray{Id, T}
-
-Wrapper for `NativeArray<T>` which supports indexing via `Id<T>` instead of `int`, where `T` is a non-constraint generic parameter.
-The collection is useful for enumeration of the specifically listed objects like triangles, circles, points, etc., and their properties.
-Using `Id` could protect from errors related to reading from nonrelated buffer with the given type of objects.
-Consider the following struct
-
-```csharp
-public readonly struct Triangle { /* ... */ }
-```
-
-Then using the `NativeIndexedArray` one can prepare the following collections
-to group some triangle properties.
-
-```csharp
-using var triangles = new NativeIndexedArray<Id<Triangle>, Triangle>(128, Allocator.Persistent);
-using var areas = new NativeIndexedArray<Id<Triangle>, float>(128, Allocator.Persistent);
-using var neighborsCount = new NativeIndexedArray<Id<Triangle>, int>(128, Allocator.Persistent);
-```
-
-To access the elements one has to use `Id<Triangle>` instead of `int`
-
-```csharp
-var triangleId = (Id<Triangle>)42;
-
-var triangle = triangles[triangleId];
-var area = areas[triangleId];
-var neighborCount = neighborsCount[triangleId];
-```
-
-`NativeIndexedArray<Id, T>` can be enumarated by using values, ids or id–value tuples:
-
-```csharp
-using var data = new NativeIndexedArray<Id<int>, int>(new[]{1, 42, 6}, Allocator.Persistent);
-
-foreach (var value in data)
-{
-  UnityEngine.Debug.Log(value); 
-} // Expected: 1, 42, 6.
-
-foreach (var id in data.Ids)
-{
-  UnityEngine.Debug.Log(id); 
-} // Expected: (Id<int>)0, (Id<int>)1, (Id<int>)2.
-
-foreach (var (id, value) in data.IdsValues)
-{
-  UnityEngine.Debug.Log($"{id}, {value}"); 
-} // Expected: ((Id<int>)0, 1), ((Id<int>)1, 42), ((Id<int>)2, 6).
-```
-
-## NativeIndexedList{Id, T}
-
-Wrapper for `NativeList<T>` which supports indexing via `Id<T>` instead of `int`, where `T` is a non-constraint generic parameter.
-See [NativeIndexedArray{Id, T}](#nativeindexedarrayid-t) for more details.
-
-## Native2dTree
-
-The package supports basic implementation of [_k_-d tree](https://en.wikipedia.org/wiki/K-d_tree) for _k_=2.
-The following structure is especially useful for range searches and nearest neighbor queries.
-
-Example usage:
-
-```csharp
-using var result = new NativeList<int>(64, Allocator.Persistent);
-using var tree = new Native2dTree(6, Allocator.Persistent);
-using var positions = new NativeArray<float2>(new float2[]
-{
-  new(7, 2), new(5, 4), new(9, 6), new(2, 3), new(4, 7), new(8, 1)
-}, Allocator.Persistent);
-
-tree.Construct(positions);
-
-// Expected result: (2, 3), (5, 4)
-tree.RangeSearch(range: new AABB(0, 6), positions, result); 
-```
-
-Currently, only `RangeSearch` with `AABB` range is implemented.
-Below one can find performance benchmark for the structure (tested on Intel i7-4790K @ 4GHz).
-
-![kd-tree](Documentation~/kdtree.svg)
-
-An advanced usage of 2d-tree can be found at [**Flocking**](https://github.com/andywiecko/Flocking) repository.
-
 ## NativeBoundingVolumeTree{T}
 
 A bounding volume tree is a data structure that is especially useful as supporting operations during collision detection or ray tracing algorithms.
@@ -219,7 +138,7 @@ Currently, the package provides the following implementations
 
 **Note:** AABB 3d is easy to implement by changing `float2` to `float3` in AABB (2d).
 
-### Example usage
+**Example usage**
 
 To work with the tree one has to allocate native data by declaring the number of leaves (i.e. number of bounding volume objects from which tree will be constructed):
 
@@ -311,7 +230,7 @@ result.Dispose();
 
 **Note:** the current implementation of the tree does not contain the `Optimize()` method as a consequence it is recommended to use the tree only for consistent structures (like the ones presented in the [Results](#results) section).
 
-### Results
+**Results**
 
 Below one can find an example result of the constructed `NativeBoundingVolumeTree{T}` for `AABB` and `MBC`, respectively.
 The tree was constructed from triangle mesh marked with blue.
@@ -324,6 +243,63 @@ Traversing bounding volume tree made of MBC:
 ![nyan-cat-mbc](Documentation~/mbc.gif)
 
 **Note:** the triangle mesh was obtained using the related package: [**BurstTriangulator**](https://github.com/andywiecko/BurstTriangulator).
+
+## NativeIndexedArray{Id, T}
+
+Wrapper for `NativeArray<T>` which supports indexing via `Id<T>` instead of `int`, where `T` is a non-constraint generic parameter.
+The collection is useful for enumeration of the specifically listed objects like triangles, circles, points, etc., and their properties.
+Using `Id` could protect from errors related to reading from nonrelated buffer with the given type of objects.
+Consider the following struct
+
+```csharp
+public readonly struct Triangle { /* ... */ }
+```
+
+Then using the `NativeIndexedArray` one can prepare the following collections
+to group some triangle properties.
+
+```csharp
+using var triangles = new NativeIndexedArray<Id<Triangle>, Triangle>(128, Allocator.Persistent);
+using var areas = new NativeIndexedArray<Id<Triangle>, float>(128, Allocator.Persistent);
+using var neighborsCount = new NativeIndexedArray<Id<Triangle>, int>(128, Allocator.Persistent);
+```
+
+To access the elements one has to use `Id<Triangle>` instead of `int`
+
+```csharp
+var triangleId = (Id<Triangle>)42;
+
+var triangle = triangles[triangleId];
+var area = areas[triangleId];
+var neighborCount = neighborsCount[triangleId];
+```
+
+`NativeIndexedArray<Id, T>` can be enumarated by using values, ids or id–value tuples:
+
+```csharp
+using var data = new NativeIndexedArray<Id<int>, int>(new[]{1, 42, 6}, Allocator.Persistent);
+
+foreach (var value in data)
+{
+  UnityEngine.Debug.Log(value); 
+} // Expected: 1, 42, 6.
+
+foreach (var id in data.Ids)
+{
+  UnityEngine.Debug.Log(id); 
+} // Expected: (Id<int>)0, (Id<int>)1, (Id<int>)2.
+
+foreach (var (id, value) in data.IdsValues)
+{
+  UnityEngine.Debug.Log($"{id}, {value}"); 
+} // Expected: ((Id<int>)0, 1), ((Id<int>)1, 42), ((Id<int>)2, 6).
+```
+
+## NativeIndexedList{Id, T}
+
+Wrapper for `NativeList<T>` which supports indexing via `Id<T>` instead of `int`, where `T` is a non-constraint generic parameter.
+See [NativeIndexedArray{Id, T}](#nativeindexedarrayid-t) for more details.
+
 
 ## NativePointQuadtree
 
@@ -343,9 +319,37 @@ using var result = new NativeList<int>(64, Allocator.Persistent);
 tree.AsReadOnly().RangeSearch(range: new(0, 3), points, result);
 ```
 
+> **Warning**
+>
+> `NativePointQuadtree` does not support for points degeneracy!
+> Provided input must contain distinct collection of points.
+
 In the figure, one can find a schematic representation of the quadtree (generated using the package) for moving particles in the box with periodic boundary conditions.
 
 ![quadtree](Documentation~/quadtree.gif)
+
+## NativeStack{T}
+
+Simple implementation of the stack data structure.
+
+Example usage:
+
+```csharp
+var stack = new NativeStack<int>(capacity: 10, Allocator.Persistent);
+
+stack.Push(0);
+stack.Push(1);
+stack.Push(2);
+
+while(stack.TryPop(out var item))
+{
+    UnityEngine.Debug.Log(item);
+} // Expected logs: 2, 1, 0
+
+stack.Dispose();
+```
+
+Remarks: implementation probably will be deprecated in the future, when Unity team add stack implementation to `Unity.Collections`.
 
 ## Dependencies
 
@@ -359,10 +363,7 @@ In the figure, one can find a schematic representation of the quadtree (generate
 - [ ] Implement `.Optimize()` for `BoundingVolumeTree{T}`,
 - [ ] Implement `Depth-first search` for `BoundingVolumeTree{T}`,
 - [ ] Implement `DynamicBoundingVolumeTree{T}`,
-- [X] ~~Implement `NativeQuad/OctTree}`,~~
 - [ ] Implement `NativeGrid` (2d/3d),
-- [X] ~~Implement `NativeArray2d{T}`,~~
-- [X] ~~CI/CD setup.~~
 
 ## Contributors
 
