@@ -15,6 +15,7 @@ Burst friendly (special) native collections for Unity.
   - [NativeBoundingVolumeTree{T}](#nativeboundingvolumetreet)
     - [Example usage](#example-usage)
     - [Results](#results)
+  - [NativePointQuadtree](#nativepointquadtree)
   - [Dependencies](#dependencies)
   - [TODO](#todo)
   - [Contributors](#contributors)
@@ -324,6 +325,28 @@ Traversing bounding volume tree made of MBC:
 
 **Note:** the triangle mesh was obtained using the related package: [**BurstTriangulator**](https://github.com/andywiecko/BurstTriangulator).
 
+## NativePointQuadtree
+
+The package provides the basic implementation of a [quadtree](https://en.wikipedia.org/wiki/Quadtree) (for points). Similar to the bounding volume tree, the quadtree can be used for computation acceleration.
+An example of usage can be found below
+
+```csharp
+using var tree = new NativePointQuadtree(bounds: new(0, 10), treeCapacity: 64, nodeCapacity: 1, Allocator.Persistent);
+var points = new[]{ math.float2(0, 1), math.float2(5, 5), math.float2(3, 2) };
+tree.Build(points); // pass JobHandle here to add this to jobs pipeline.
+```
+
+There is availible AABB range query for the `NativePointQuadtree`
+
+```csharp
+using var result = new NativeList<int>(64, Allocator.Persistent);
+tree.AsReadOnly().RangeSearch(range: new(0, 3), points, result);
+```
+
+In the figure, one can find a schematic representation of the quadtree (generated using the package) for moving particles in the box with periodic boundary conditions.
+
+![quadtree](Documentation~/quadtree.gif)
+
 ## Dependencies
 
 - [`Unity.Burst`](https://docs.unity3d.com/Packages/com.unity.burst@1.7/manual/index.html)
@@ -336,7 +359,7 @@ Traversing bounding volume tree made of MBC:
 - [ ] Implement `.Optimize()` for `BoundingVolumeTree{T}`,
 - [ ] Implement `Depth-first search` for `BoundingVolumeTree{T}`,
 - [ ] Implement `DynamicBoundingVolumeTree{T}`,
-- [ ] Implement `NativeQuad/OctTree}`,
+- [X] ~~Implement `NativeQuad/OctTree}`,~~
 - [ ] Implement `NativeGrid` (2d/3d),
 - [X] ~~Implement `NativeArray2d{T}`,~~
 - [X] ~~CI/CD setup.~~
