@@ -10,16 +10,11 @@ namespace andywiecko.BurstCollections
     /// </remarks>
     public readonly struct MBC : IBoundingVolume<MBC>
     {
-        public float Volume { get; }
+        public float Volume => Radius * Radius * math.PI;
         public readonly float2 Position;
         public readonly float Radius;
 
-        public MBC(float2 position, float radius)
-        {
-            Position = position;
-            Radius = radius;
-            Volume = radius * radius * math.PI;
-        }
+        public MBC(float2 position, float radius) => (Position, Radius) = (position, radius);
 
         public bool Intersects(MBC other)
         {
@@ -40,8 +35,5 @@ namespace andywiecko.BurstCollections
             var r = 0.5f * (Radius + other.Radius + d);
             return new MBC(p, r);
         }
-
-        public void Deconstruct(out float2 position, out float radius) => _ =
-            (position = Position, radius = Radius);
     }
 }
