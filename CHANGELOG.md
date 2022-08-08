@@ -1,5 +1,18 @@
 # Change log
 
+## [1.5.0] – 2022-08-08
+
+### Features
+
+- `NativePointQuadtree` added. Implemented quadtree supports for AABB range query. 
+- `Reinterpret<T>` and `ElementAt` methods for `NativeIndexedArray<T>` added.
+- `Ref<T>` class added. It is handy for using with native collections.
+
+### Changes
+
+- A small bounding volume structs `AABB` and `MBC` refactor.
+- A few code style fixes.
+
 ## [1.4.0] – 2022-04-23
 
 ### Features
