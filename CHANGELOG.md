@@ -1,5 +1,11 @@
 # Change log
 
+## [1.6.0] – 2022-09-08
+
+### Features
+
+- `(ReadOnly)Span` extensions for `Unity.Collections`.
+
 ## [1.5.0] – 2022-08-08
 
 ### Features
