@@ -56,8 +56,8 @@ namespace andywiecko.BurstCollections
         public void ResizeUninitialized(int length) => list.ResizeUninitialized(length);
         public NativeIndexedArray<Id, T>.ReadOnly AsParallelReader() => new() { array = list.AsParallelReader() };
         public ParallelWriter AsParallelWriter() => new(this);
-        unsafe public ReadOnlySpan<T> AsReadOnlySpan() => new(list.GetUnsafeReadOnlyPtr(), Length);
-        unsafe public Span<T> AsSpan() => new(list.GetUnsafePtr(), Length);
+        unsafe public ReadOnlySpan<T> AsReadOnlySpan() => list.AsReadOnlySpan();
+        unsafe public Span<T> AsSpan() => list.AsSpan();
         public IdEnumerator<Id> Ids => new(start: 0, Length);
         public IdValueEnumerator<Id, T> IdsValues => new(AsReadOnlySpan());
         public static implicit operator Span<T>(NativeIndexedList<Id, T> array) => array.AsSpan();

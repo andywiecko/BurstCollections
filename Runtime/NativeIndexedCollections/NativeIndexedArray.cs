@@ -44,8 +44,8 @@ namespace andywiecko.BurstCollections
 
         public NativeArray<T> GetInnerArray() => array;
         public ReadOnly AsReadOnly() => new(this);
-        public ReadOnlySpan<T> AsReadOnlySpan() => AsReadOnly().AsReadOnlySpan();
-        unsafe public Span<T> AsSpan() => new(array.GetUnsafePtr(), Length);
+        public ReadOnlySpan<T> AsReadOnlySpan() => array.AsReadOnlySpan();
+        unsafe public Span<T> AsSpan() => array.AsSpan();
         public T[] ToArray() => array.ToArray();
         public NativeIndexedArray<Id, U> Reinterpret<U>() where U : unmanaged => new() { array = array.Reinterpret<U>() };
         public NativeIndexedArray<NewId, U> Reinterpret<NewId, U>() where NewId : unmanaged, IIndexer where U : unmanaged =>
@@ -75,7 +75,7 @@ namespace andywiecko.BurstCollections
             public NativeIndexedArray<Id, U>.ReadOnly Reinterpret<U>() where U : unmanaged => new() { array = array.Reinterpret<U>() };
             public T[] ToArray() => array.ToArray();
             public NativeArray<T>.ReadOnly.Enumerator GetEnumerator() => array.GetEnumerator();
-            unsafe public ReadOnlySpan<T> AsReadOnlySpan() => new(array.GetUnsafeReadOnlyPtr(), Length);
+            unsafe public ReadOnlySpan<T> AsReadOnlySpan() => array.AsReadOnlySpan();
             public IdEnumerator<Id> Ids => new(start: 0, Length);
             public IdValueEnumerator<Id, T> IdsValues => new(AsReadOnlySpan());
             public static implicit operator ReadOnlySpan<T>(ReadOnly array) => array.AsReadOnlySpan();
