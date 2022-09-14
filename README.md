@@ -1,6 +1,7 @@
 # BurstCollections
 
 [![Editor tests](https://github.com/andywiecko/BurstCollections/actions/workflows/test.yml/badge.svg)](https://github.com/andywiecko/BurstCollections/actions/workflows/test.yml)
+[![openupm](https://img.shields.io/npm/v/com.andywiecko.burst.collections?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.andywiecko.burst.collections/)
 
 Burst friendly (special) native collections for Unity.
 
@@ -16,16 +17,44 @@ Burst friendly (special) native collections for Unity.
   - [NativeStack{T}](#nativestackt)
   - [Dependencies](#dependencies)
   - [TODO](#todo)
-  - [Contributors](#contributors)
 
 ## Getting started
 
-To use the package choose one of the following:
+Install the package using one of the following methods
 
-- Clone or download this repository and then select `package.json` using Package Manager (`Window/Package Manager`).
+<details open>
+<summary> Using scoped registry <b>(recommended)</b> </summary>
+Use OpenUPM CLI or add corresponding entries to the project's <code>manifest.json</code> manually.
+Add or modify scoped registries in the manifest
+<pre>
+  "scopedRegistries": [
+    {
+      "name": "OpenUPM",
+      "url": "https://package.openupm.com/",
+      "scopes": [
+        "com.andywiecko"
+      ]
+    }
+  ]
+</pre>
+and in the dependencies provide selected version of the package
+<pre>
+"dependencies": {
+    "com.andywiecko.burst.collections": "1.6.0",
+    ...
+</pre>
+See Unity docs for more details https://docs.unity3d.com/2021.1/Documentation/Manual/upm-scoped.html
+</details>
 
-- Use package manager via git install: `https://github.com/andywiecko/BurstCollections.git`.
-  (Note: one can specify exact version with a proper tag: `https://github.com/andywiecko/BurstCollections.git#v1.6.0`)
+<details>
+<summary> <code>git</code> install </summary>
+Use package manager via git install: https://github.com/andywiecko/BurstCollections.git#v1.6.0
+</details>
+
+<details>
+<summary> Manual instalation </summary>
+Clone or download this repository and then select <code>package.json</code> using Package Manager (<code>Window/Package Manager</code>).
+</details>
 
 ## Native2dTree
 
@@ -353,10 +382,10 @@ Remarks: implementation probably will be deprecated in the future, when Unity te
 
 ## Dependencies
 
-- [`Unity.Burst`](https://docs.unity3d.com/Packages/com.unity.burst@1.7/manual/index.html)
+- [`Unity.Burst`][burst]
 - [`Unity.Mathematics`](https://docs.unity3d.com/Packages/com.unity.mathematics@1.2/manual/index.html)
 - [`Unity.Collections`](https://docs.unity3d.com/Packages/com.unity.collections@1.1/manual/index.html)
-- [`Unity.Jobs`](https://docs.unity3d.com/Packages/com.unity.jobs@0.11/manual/index.html)
+- [`Unity.Jobs`][jobs]
 
 ## TODO
 
@@ -365,9 +394,7 @@ Remarks: implementation probably will be deprecated in the future, when Unity te
 - [ ] Implement `DynamicBoundingVolumeTree{T}`,
 - [ ] Implement `NativeGrid` (2d/3d),
 
-## Contributors
-
-- [Andrzej Więckowski, Ph.D](https://andywiecko.github.io/).
-
 [aabb]:https://en.wikipedia.org/wiki/Axis-aligned_bounding_box
 [mbc]:https://en.wikipedia.org/wiki/Minimum_bounding_circle
+[burst]:https://docs.unity3d.com/Packages/com.unity.burst@1.7/manual/index.html
+[jobs]:https://docs.unity3d.com/Packages/com.unity.jobs@0.11/manual/index.html
