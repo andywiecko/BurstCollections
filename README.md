@@ -15,6 +15,7 @@ Burst friendly (special) native collections for Unity.
   - [NativeIndexedList{Id, T}](#nativeindexedlistid-t)
   - [NativePointQuadtree](#nativepointquadtree)
   - [NativeStack{T}](#nativestackt)
+  - [NativeStackedLists{T}](#nativestackedlistst)
   - [Dependencies](#dependencies)
   - [TODO](#todo)
 
@@ -329,7 +330,6 @@ foreach (var (id, value) in data.IdsValues)
 Wrapper for `NativeList<T>` which supports indexing via `Id<T>` instead of `int`, where `T` is a non-constraint generic parameter.
 See [NativeIndexedArray{Id, T}](#nativeindexedarrayid-t) for more details.
 
-
 ## NativePointQuadtree
 
 The package provides the basic implementation of a [quadtree](https://en.wikipedia.org/wiki/Quadtree) (for points). Similar to the bounding volume tree, the quadtree can be used for computation acceleration.
@@ -379,6 +379,48 @@ stack.Dispose();
 ```
 
 Remarks: implementation probably will be deprecated in the future, when Unity team add stack implementation to `Unity.Collections`.
+
+## NativeStackedLists{T}
+
+The problem with the current version of `Unity.Collections` is that the nested collections are not allowed (e.g. `NativeArray<NativeArray<T>>`) except the _unsafe_ context.
+The `NativeStackedLists` is combination of stack and lists.
+One could add elements to the list but only for the top one in the stack.
+Example:
+
+```csharp
+using var stackedLists = new NativeStackedLists<int>(64, 4, Allocator.Persistent);
+
+stackedLists.Push(); // Add new list to the stack
+stackedLists.Add(4); // Add elements
+stackedLists.Add(5);
+stackedLists.Add(6);
+
+stackedLists.Push(); // Add new list to the stack
+stackedLists.Add(8); // Add elements
+stackedLists.Add(9);
+
+// stacked list is equivalent of the following collection:
+// {{4, 5, 6}, {8, 9}}
+```
+
+Adding the new elements is restricted only for the top list, however, one could get/set element for any list in the stack:
+
+```csharp
+var list0 = stackedLists[0]; // type of NativeArray<T> with read/write access
+var list1 = stackedLists[1];
+```
+
+There are also implemented a proper enumerators for `foreach` statements:
+
+```csharp
+foreach(var list in stackedLists)
+{
+  foreach(var i in list)
+  {
+    // ...
+  }
+}
+```
 
 ## Dependencies
 
