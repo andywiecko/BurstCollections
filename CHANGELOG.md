@@ -1,5 +1,11 @@
 # Change log
 
+## [1.7.0] – 2022-12-06
+
+### Features
+
+- `NativeStackedLists<T>` added. It can be used as an alternative for nested collections.
+
 ## [1.6.0] – 2022-09-08
 
 ### Features
@@ -10,7 +16,7 @@
 
 ### Features
 
-- `NativePointQuadtree` added. Implemented quadtree supports for AABB range query. 
+- `NativePointQuadtree` added. Implemented quadtree supports for AABB range query.
 - `Reinterpret<T>` and `ElementAt` methods for `NativeIndexedArray<T>` added.
 - `Ref<T>` class added. It is handy for using with native collections.
 
