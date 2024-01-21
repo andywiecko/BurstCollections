@@ -48,17 +48,17 @@ namespace andywiecko.BurstCollections.Editor.Tests
 
             aabb = new AABB(-2, -1);
             tree.GetIntersectionsWithAABB(aabb, result);
-            var result1 = result.ToArray();
+            var result1 = result.AsArray().ToArray();
             result.Clear();
 
             aabb = new AABB(0.5f, 1.5f);
             tree.GetIntersectionsWithAABB(aabb, result);
-            var result2 = result.ToArray();
+            var result2 = result.AsArray().ToArray();
             result.Clear();
 
             aabb = new AABB(math.float2(5.5f, 0.5f), math.float2(5.5f, 0.5f));
             tree.GetIntersectionsWithAABB(aabb, result);
-            var result3 = result.ToArray();
+            var result3 = result.AsArray().ToArray();
             result.Clear();
 
             Assert.That(result1, Is.Empty);
@@ -137,7 +137,7 @@ namespace andywiecko.BurstCollections.Editor.Tests
 
             tree1.GetIntersectionsWithTree(tree2, result);
 
-            return result.ToArray().OrderBy(i => i.x).ThenBy(i => i.y).ToArray();
+            return result.AsArray().OrderBy(i => i.x).ThenBy(i => i.y).ToArray();
         }
     }
 }

@@ -105,8 +105,8 @@ namespace andywiecko.BurstCollections.Editor.Tests
         {
             using var tree = new NativePointQuadtree(input.bounds, treeCapacity: 1024, input.nodeCapacity, Allocator.Persistent);
             tree.Build(input.points);
-            Assert.That(tree.Nodes.ToArray(), Is.EqualTo(input.nodes));
-            Assert.That(tree.ElementsIds.ToArray(), Is.EqualTo(input.elementsIds));
+            Assert.That(tree.Nodes.AsArray(), Is.EqualTo(input.nodes));
+            Assert.That(tree.ElementsIds.AsArray(), Is.EqualTo(input.elementsIds));
         }
 
         [Test]

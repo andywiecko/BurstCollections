@@ -35,7 +35,7 @@ namespace andywiecko.BurstCollections.Editor.Tests
             using var tree = new NativePointQuadtree(bounds, treeCapacity: 64, nodeCapacity: 1, Allocator.Persistent);
             tree.Build(points);
             tree.AsReadOnly().RangeSearch(range, points, result);
-            return result.ToArray().OrderBy(i => i).ToArray();
+            return result.AsArray().OrderBy(i => i).ToArray();
         }
     }
 }
