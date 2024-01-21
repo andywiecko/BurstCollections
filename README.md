@@ -41,7 +41,7 @@ Add or modify scoped registries in the manifest
 and in the dependencies provide selected version of the package
 <pre>
 "dependencies": {
-    "com.andywiecko.burst.collections": "1.7.0",
+    "com.andywiecko.burst.collections": "1.7.1",
     ...
 </pre>
 See Unity docs for more details https://docs.unity3d.com/2021.1/Documentation/Manual/upm-scoped.html
@@ -49,7 +49,7 @@ See Unity docs for more details https://docs.unity3d.com/2021.1/Documentation/Ma
 
 <details>
 <summary> <code>git</code> install </summary>
-Use package manager via git install: https://github.com/andywiecko/BurstCollections.git#v1.7.0
+Use package manager via git install: https://github.com/andywiecko/BurstCollections.git#v1.7.1
 </details>
 
 <details>

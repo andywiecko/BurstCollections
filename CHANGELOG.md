@@ -1,5 +1,11 @@
 # Change log
 
+## [1.7.1] – 2024-01-21
+
+### Fixed
+
+- Compatibility with `Unity.Collections@v2`.
+
 ## [1.7.0] – 2022-12-06
 
 ### Features
