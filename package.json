@@ -1,6 +1,6 @@
 {
     "name": "com.andywiecko.burst.collections",
-    "version": "1.7.0",
+    "version": "1.7.1",
     "displayName": "Burst Collections",
     "description": "Burst friendly (special) native collections for Unity.",
     "unity": "2021.2",
