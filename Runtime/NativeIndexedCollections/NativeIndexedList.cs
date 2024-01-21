@@ -45,7 +45,7 @@ namespace andywiecko.BurstCollections
         public void RemoveRange(int index, int count) => list.RemoveRange(index, count);
         public NativeIndexedArray<Id, T> AsArray() => new() { array = list.AsArray() };
         public NativeIndexedArray<Id, T> AsDeferredJobArray() => new() { array = list.AsDeferredJobArray() };
-        public T[] ToArray() => list.ToArray();
+        public T[] ToArray() => list.AsArray().ToArray();
         public NativeIndexedArray<Id, T> ToArray(AllocatorManager.AllocatorHandle allocator) => new() { array = list.ToArray(allocator) };
         public NativeArray<T>.Enumerator GetEnumerator() => list.GetEnumerator();
         IEnumerator<T> IEnumerable<T>.GetEnumerator() => (list as IEnumerable<T>).GetEnumerator();
