@@ -87,7 +87,7 @@ namespace andywiecko.BurstCollections.Editor.Tests
             tree.RangeSearch(range, positions, result);
 
             result.Sort();
-            return result.ToArray();
+            return result.AsArray().ToArray();
         }
 
         private static readonly TestCaseData[] findDeepestNodeTestData = new[]
